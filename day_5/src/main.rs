@@ -1,7 +1,6 @@
+use aoc_util::{AocResult, failure};
 use std::cmp;
 use std::collections::HashMap;
-use std::error;
-use std::fmt;
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::num::ParseIntError;
@@ -9,28 +8,7 @@ use std::str::FromStr;
 
 static FILENAME: &str = "input.txt";
 
-// Error handling boilerplate. Factor me out!
-#[derive(Debug, Clone)]
-struct AocError {
-    err: String,
-}
-type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
-
-impl fmt::Display for AocError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.err)
-    }
-}
-
-impl error::Error for AocError {}
-
-fn failure<T>(err: &str) -> Result<T> {
-    Err(Box::new(AocError {
-        err: err.to_string(),
-    }))
-}
-
-fn main() -> Result<()> {
+fn main() -> AocResult<()> {
     println!("Part 1: {}", part1(FILENAME)?);
     println!("Part 2: {}", part2(FILENAME)?);
 
@@ -65,15 +43,15 @@ impl FromStr for Point {
     }
 }
 
-fn part1(filename: &str) -> Result<i64> {
+fn part1(filename: &str) -> AocResult<i64> {
     solve(filename, false)
 }
 
-fn part2(filename: &str) -> Result<i64> {
+fn part2(filename: &str) -> AocResult<i64> {
     solve(filename, true)
 }
 
-fn solve(filename: &str, consider_diags: bool) -> Result<i64> {
+fn solve(filename: &str, consider_diags: bool) -> AocResult<i64> {
     let file = File::open(filename)?;
     let lines = io::BufReader::new(file).lines();
     let mut vent_map = HashMap::new();
@@ -85,7 +63,7 @@ fn solve(filename: &str, consider_diags: bool) -> Result<i64> {
                 .map(|x| Point::from_str(x))
                 .collect::<core::result::Result<Vec<_>, ParseIntError>>()?;
             if point_vec.len() != 2 {
-                failure("Badly formatted point")?
+                return failure("Badly formatted point");
             } else {
                 point_vec
             }
