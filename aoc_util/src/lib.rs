@@ -30,7 +30,7 @@ pub fn failure<T>(err: &str) -> AocResult<T> {
     Err(Box::new(AocError::new(err)))
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
 pub struct Point {
     pub i: usize,
     pub j: usize,
