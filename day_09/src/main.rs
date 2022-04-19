@@ -75,7 +75,7 @@ fn part2(grid: &Grid) -> AocResult<u64> {
 }
 
 fn main() -> AocResult<()> {
-    let grid: Grid = Grid::from_file(FILENAME)?;
+    let grid: Grid = Grid::from_digit_matrix_file(FILENAME)?;
 
     println!("Part 1: {}", part1(&grid)?);
     println!("Part 2: {}", part2(&grid)?);

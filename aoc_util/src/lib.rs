@@ -69,7 +69,7 @@ pub struct Grid {
 ///  .    .    .
 ///  .    .    .
 impl Grid {
-    pub fn from_file(filename: &str) -> AocResult<Self> {
+    pub fn from_digit_matrix_file(filename: &str) -> AocResult<Self> {
         let file = File::open(filename)?;
         let lines: Vec<String> = io::BufReader::new(file)
             .lines()

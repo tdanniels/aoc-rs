@@ -45,7 +45,7 @@ fn sim(grid: &mut Grid) -> AocResult<u64> {
 }
 
 fn solve(filename: &str) -> AocResult<(u64, u64)> {
-    let mut grid = Grid::from_file(filename)?;
+    let mut grid = Grid::from_digit_matrix_file(filename)?;
     let mut run_sim = true;
     let mut step = 0;
     let mut flash_count = 0;
