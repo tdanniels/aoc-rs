@@ -16,7 +16,7 @@ fn parse_input(filename: &str) -> AocResult<(String, Rules)> {
 
     let template: String = lines.next().ok_or("No template?")??;
     if !template.is_ascii() {
-        return failure(&format!("Template {} isn't ascii", template));
+        return failure(format!("Template {} isn't ascii", template));
     }
 
     if lines.next().ok_or("Nothing after template?")?? != "" {
@@ -28,12 +28,12 @@ fn parse_input(filename: &str) -> AocResult<(String, Rules)> {
 
         let pair = split.next().ok_or("No pair?")?.trim();
         if !pair.is_ascii() {
-            return failure(&format!("Pair {} isn't ascii", pair));
+            return failure(format!("Pair {} isn't ascii", pair));
         }
 
         let insertion = split.next().ok_or("No insertion?")?.trim();
         if !insertion.is_ascii() {
-            return failure(&format!("Insertion {} isn't ascii", insertion));
+            return failure(format!("Insertion {} isn't ascii", insertion));
         }
 
         rules.insert(pair.to_string(), insertion.to_string());

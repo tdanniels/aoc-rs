@@ -27,8 +27,8 @@ impl fmt::Display for AocError {
 
 impl error::Error for AocError {}
 
-pub fn failure<T>(err: &str) -> AocResult<T> {
-    Err(Box::new(AocError::new(err)))
+pub fn failure<T, S: AsRef<str>>(err: S) -> AocResult<T> {
+    Err(Box::new(AocError::new(err.as_ref())))
 }
 
 #[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
@@ -112,7 +112,7 @@ impl Grid {
 
     pub fn at(&self, p: Point) -> AocResult<u8> {
         if p.i >= self.num_rows || p.j >= self.num_cols {
-            return failure(&format!("Invalid coordinates {}", p));
+            return failure(format!("Invalid coordinates {}", p));
         }
         Ok(self.cells[p.i * self.num_cols + p.j])
     }
@@ -146,7 +146,7 @@ impl Grid {
 
     pub fn set(&mut self, point: Point, value: u8) -> AocResult<()> {
         if point.i >= self.num_rows || point.j >= self.num_cols {
-            return failure(&format!("Invalid coordinates {}", point));
+            return failure(format!("Invalid coordinates {}", point));
         }
         self.cells[point.i * self.num_cols + point.j] = value;
         Ok(())
@@ -160,7 +160,7 @@ impl Grid {
     /// the form (point coordinate pair, value).
     pub fn neighbourhood8(&self, point: Point) -> AocResult<Vec<Option<(Point, u8)>>> {
         if point.i >= self.num_rows || point.j >= self.num_cols {
-            return failure(&format!("Invalid coordinates {}", point));
+            return failure(format!("Invalid coordinates {}", point));
         }
         let mut out: Vec<Option<(Point, u8)>> = Vec::new();
 
@@ -218,7 +218,7 @@ impl UnweightedUndirectedGraph {
                     .iter()
                     .all(|v| v.chars().all(|c| c.is_ascii_alphabetic()))
             {
-                return failure(&format!("Malformed edge {:?} in input", edge));
+                return failure(format!("Malformed edge {:?} in input", edge));
             }
 
             for i in 0..2 {

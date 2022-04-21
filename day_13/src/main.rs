@@ -32,7 +32,7 @@ fn parse_input(filename: &str) -> AocResult<(Paper, Folds)> {
                 .map(|x| x.parse::<usize>())
                 .collect::<Result<Vec<_>, _>>()?;
             if x_y.len() != 2 {
-                return failure(&format!("Invalid coordinate pair {:?}", x_y));
+                return failure(format!("Invalid coordinate pair {:?}", x_y));
             }
             paper.insert((x_y[0], x_y[1]));
         } else {
@@ -47,7 +47,7 @@ fn parse_input(filename: &str) -> AocResult<(Paper, Folds)> {
             let fold = match axis {
                 'x' => Ok(Fold::X(coord)),
                 'y' => Ok(Fold::Y(coord)),
-                _ => failure(&format!("Bad axis {}", axis)),
+                _ => failure(format!("Bad axis {}", axis)),
             }?;
             folds.push(fold);
             if !split.next().is_none() {
