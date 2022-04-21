@@ -1,6 +1,5 @@
 use std::error;
 use std::fs;
-use std::num::ParseIntError;
 
 static FILENAME: &str = "input.txt";
 
