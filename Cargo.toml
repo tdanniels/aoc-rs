@@ -1,0 +1,67 @@
+[package]
+name = "aoc_2021"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+aoc-util = { path = "aoc_util" }
+
+[[bin]]
+name = "day_01"
+path = "day_01/src/main.rs"
+
+[[bin]]
+name = "day_02"
+path = "day_02/src/main.rs"
+
+[[bin]]
+name = "day_03"
+path = "day_03/src/main.rs"
+
+[[bin]]
+name = "day_04"
+path = "day_04/src/main.rs"
+
+[[bin]]
+name = "day_05"
+path = "day_05/src/main.rs"
+
+[[bin]]
+name = "day_06"
+path = "day_06/src/main.rs"
+
+[[bin]]
+name = "day_07"
+path = "day_07/src/main.rs"
+
+[[bin]]
+name = "day_08"
+path = "day_08/src/main.rs"
+
+[[bin]]
+name = "day_09"
+path = "day_09/src/main.rs"
+
+[[bin]]
+name = "day_10"
+path = "day_10/src/main.rs"
+
+[[bin]]
+name = "day_11"
+path = "day_11/src/main.rs"
+
+[[bin]]
+name = "day_12"
+path = "day_12/src/main.rs"
+
+[[bin]]
+name = "day_13"
+path = "day_13/src/main.rs"
+
+[[bin]]
+name = "day_14"
+path = "day_14/src/main.rs"
+
+[[bin]]
+name = "day_15"
+path = "day_15/src/main.rs"
