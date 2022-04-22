@@ -4,6 +4,7 @@ use std::error;
 use std::fmt;
 use std::fs::File;
 use std::io::{self, BufRead};
+use std::path::Path;
 
 pub fn get_cli_arg() -> AocResult<String> {
     let mut args: Vec<String> = env::args().collect();
@@ -11,6 +12,21 @@ pub fn get_cli_arg() -> AocResult<String> {
         return failure(format!("Bad CLI args: {:?}", args));
     }
     Ok(args.pop().unwrap())
+}
+
+pub fn get_data_file(name: &str) -> AocResult<String> {
+
+    const FILE: &'static str = concat!(env!("CARGO_MANIFEST_DIR"), "/", file!());
+    let datafile = Path::new(FILE)
+        .parent()
+        .ok_or("No first parent?")?
+        .parent()
+        .ok_or("No second parent?")?
+        .as_os_str();
+
+    Ok(datafile.to_str().ok_or(format!("OsStr {:?} -> str failed?", datafile))?
+        .to_string()
+        + "/" + name)
 }
 
 #[derive(Debug, Clone)]
