@@ -1,4 +1,5 @@
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::cmp::{Ordering, Reverse};
+use std::collections::{BinaryHeap, HashMap, HashSet, VecDeque};
 use std::env;
 use std::error;
 use std::fmt;
@@ -273,41 +274,38 @@ impl Grid {
     ) -> AocResult<(Vec<Point>, Option<u64>)> {
         let mut dist: Vec<Option<u64>> = vec![None; self.num_rows * self.num_cols];
         let mut prev: Vec<Option<usize>> = vec![None; self.num_rows * self.num_cols];
-        let mut q: VecDeque<usize> = (0..self.num_rows * self.num_cols).collect();
+        let mut q: BinaryHeap<Reverse<DistIdx>> = BinaryHeap::new();
         let start_index = self.index_from_point(start)?;
         let finish_index = self.index_from_point(finish)?;
 
         dist[start_index] = Some(0);
+        q.push(Reverse(DistIdx {
+            dist: dist[start_index].unwrap(),
+            idx: start_index,
+        }));
 
         while q.len() != 0 {
-            let (u_remove_index, &u_index) = q
-                .iter()
-                .enumerate()
-                .min_by_key(|(_, k)| if let Some(d) = dist[**k] { d } else { u64::MAX })
-                .ok_or("No min?")?;
-            if u_index == finish_index {
-                break;
-            }
-            if q.remove(u_remove_index).is_none() {
-                return failure(format!("Failed to remove q[{u_index}]"));
-            }
-
+            let u_index = q.pop().unwrap().0.idx;
             let u_point = self.point_from_index(u_index)?;
             for v in self.neighbourhood(u_point, neighbour_pattern)? {
                 if let Some(v) = v {
                     let v_index = self.index_from_point(v.0)?;
-                    if let Some(v_index) = q.iter().find(|&&x| x == v_index) {
-                        let alt = {
-                            if let Some(d) = dist[u_index] {
-                                d + v.1 as u64
-                            } else {
-                                u64::MAX
-                            }
-                        };
+                    let alt = {
+                        if let Some(d) = dist[u_index] {
+                            d + v.1 as u64
+                        } else {
+                            u64::MAX
+                        }
+                    };
 
-                        if alt < dist[*v_index].map_or(u64::MAX, |x| x) {
-                            dist[*v_index] = Some(alt);
-                            prev[*v_index] = Some(u_index);
+                    if alt < dist[v_index].map_or(u64::MAX, |x| x) {
+                        dist[v_index] = Some(alt);
+                        prev[v_index] = Some(u_index);
+                        if q.iter().find(|&x| x.0.idx == v_index).is_none() {
+                            q.push(Reverse(DistIdx {
+                                dist: alt,
+                                idx: v_index,
+                            }));
                         }
                     }
                 }
@@ -325,6 +323,30 @@ impl Grid {
         }
 
         Ok((out.drain(..).collect(), dist[finish_index]))
+    }
+}
+
+#[derive(Eq)]
+struct DistIdx {
+    dist: u64,
+    idx: usize,
+}
+
+impl Ord for DistIdx {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.dist.cmp(&other.dist)
+    }
+}
+
+impl PartialOrd for DistIdx {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl PartialEq for DistIdx {
+    fn eq(&self, other: &Self) -> bool {
+        self.dist == other.dist
     }
 }
 
