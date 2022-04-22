@@ -1,24 +1,24 @@
-use aoc_util::{get_cli_arg, AocResult, Grid, Point};
+use aoc_util::{get_cli_arg, AocResult, Grid, NeighbourPattern, Point};
 use std::collections::{BinaryHeap, HashSet, VecDeque};
 
-pub fn find_low_points(grid: &Grid) -> AocResult<Vec<((usize, usize), u64)>> {
+pub fn find_low_points(grid: &Grid) -> AocResult<Vec<(Point, u64)>> {
     let mut out = Vec::new();
     for i in 0..grid.num_rows() {
         for j in 0..grid.num_cols() {
-            let centre = grid.at(Point::new(i, j))?;
+            let p = Point::new(i, j);
+            let centre = grid.at(p)?;
             if grid
-                .neighbourhood(i, j)
-                .ok_or("Invalid neighbourhood?")?
+                .neighbourhood(Point::new(i, j), NeighbourPattern::Compass4)?
                 .iter()
                 .all(|&x| {
-                    if let Some(neighbour_height) = x.1 {
-                        centre < neighbour_height
+                    if let Some(neighbour) = x {
+                        centre < neighbour.1
                     } else {
                         true
                     }
                 })
             {
-                out.push(((i, j), centre as u64));
+                out.push((p, centre as u64));
             }
         }
     }
@@ -26,24 +26,23 @@ pub fn find_low_points(grid: &Grid) -> AocResult<Vec<((usize, usize), u64)>> {
 }
 
 /// Assumes that starting_point is a low point. Should fix this implicit assumption.
-fn get_basin_size(grid: &Grid, starting_point: &(usize, usize)) -> AocResult<u64> {
-    let mut q: VecDeque<(usize, usize)> = VecDeque::new();
-    let mut explored: HashSet<(usize, usize)> = HashSet::new();
+fn get_basin_size(grid: &Grid, starting_point: &Point) -> AocResult<u64> {
+    let mut q: VecDeque<Point> = VecDeque::new();
+    let mut explored: HashSet<Point> = HashSet::new();
     explored.insert(*starting_point);
     q.push_back(*starting_point);
     while q.len() > 0 {
         let v = q.pop_front().unwrap();
-        for neighbour in grid.neighbourhood(v.0, v.1).unwrap() {
-            if !neighbour.1.is_some() {
-                continue;
-            }
-            let neighbour_height = neighbour.1.unwrap();
-            if neighbour_height <= grid.at(Point::new(v.0, v.1))? || neighbour_height == 9 {
-                continue;
-            }
-            if explored.get(&neighbour.0).is_none() {
-                explored.insert(neighbour.0);
-                q.push_back(neighbour.0);
+        for neighbour in grid.neighbourhood(v, NeighbourPattern::Compass4).unwrap() {
+            if let Some(neighbour) = neighbour {
+                let neighbour_height = neighbour.1;
+                if neighbour_height <= grid.at(v)? || neighbour_height == 9 {
+                    continue;
+                }
+                if explored.get(&neighbour.0).is_none() {
+                    explored.insert(neighbour.0);
+                    q.push_back(neighbour.0);
+                }
             }
         }
     }
@@ -79,4 +78,39 @@ fn main() -> AocResult<()> {
     println!("Part 2: {}", part2(&grid)?);
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use aoc_util::{get_input_file, get_test_file};
+
+    #[test]
+    fn part_1_test() -> AocResult<()> {
+        let testfile = get_test_file(file!())?;
+        let grid: Grid = Grid::from_digit_matrix_file(&testfile)?;
+        assert_eq!(part1(&grid)?, 15);
+        Ok(())
+    }
+    #[test]
+    fn part_2_test() -> AocResult<()> {
+        let testfile = get_test_file(file!())?;
+        let grid: Grid = Grid::from_digit_matrix_file(&testfile)?;
+        assert_eq!(part2(&grid)?, 1134);
+        Ok(())
+    }
+    #[test]
+    fn part_1_input() -> AocResult<()> {
+        let testfile = get_input_file(file!())?;
+        let grid: Grid = Grid::from_digit_matrix_file(&testfile)?;
+        assert_eq!(part1(&grid)?, 436);
+        Ok(())
+    }
+    #[test]
+    fn part_2_input() -> AocResult<()> {
+        let testfile = get_input_file(file!())?;
+        let grid: Grid = Grid::from_digit_matrix_file(&testfile)?;
+        assert_eq!(part2(&grid)?, 1317792);
+        Ok(())
+    }
 }

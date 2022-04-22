@@ -1,4 +1,4 @@
-use aoc_util::{get_cli_arg, AocResult, Grid, Point};
+use aoc_util::{get_cli_arg, AocResult, Grid, Point, NeighbourPattern};
 use std::cmp;
 use std::collections::HashSet;
 
@@ -23,7 +23,7 @@ fn sim(grid: &mut Grid) -> AocResult<u64> {
         flashes += 1;
         grid.set(p, 0)?;
 
-        let neighbours = grid.neighbourhood8(p)?;
+        let neighbours = grid.neighbourhood(p, NeighbourPattern::Compass8)?;
         for neighbour in neighbours {
             if neighbour.is_none() {
                 continue;
@@ -80,4 +80,40 @@ fn main() -> AocResult<()> {
     println!("Part 2: {}", sync);
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use aoc_util::{get_input_file, get_test_file};
+
+    #[test]
+    fn part_1_test() -> AocResult<()> {
+        let testfile = get_test_file(file!())?;
+        let (count, _) = solve(&testfile)?;
+        assert_eq!(count, 1656);
+        Ok(())
+    }
+    #[test]
+    fn part_2_test() -> AocResult<()> {
+        let testfile = get_test_file(file!())?;
+        let (_, sync) = solve(&testfile)?;
+        assert_eq!(sync, 195);
+        Ok(())
+    }
+    #[test]
+    fn part_1_input() -> AocResult<()> {
+        let testfile = get_input_file(file!())?;
+        let (count, _) = solve(&testfile)?;
+        assert_eq!(count, 1679);
+        Ok(())
+    }
+    #[test]
+    fn part_2_input() -> AocResult<()> {
+        let testfile = get_input_file(file!())?;
+        let (_, sync) = solve(&testfile)?;
+        assert_eq!(sync, 519);
+        Ok(())
+    }
+
 }
