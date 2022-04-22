@@ -14,19 +14,26 @@ pub fn get_cli_arg() -> AocResult<String> {
     Ok(args.pop().unwrap())
 }
 
-pub fn get_data_file(name: &str) -> AocResult<String> {
+pub fn get_input_file(codefile: &str) -> AocResult<String> {
+    get_data_file(codefile, "input")
+}
 
-    const FILE: &'static str = concat!(env!("CARGO_MANIFEST_DIR"), "/", file!());
-    let datafile = Path::new(FILE)
-        .parent()
-        .ok_or("No first parent?")?
-        .parent()
-        .ok_or("No second parent?")?
-        .as_os_str();
+pub fn get_test_file(codefile: &str) -> AocResult<String> {
+    get_data_file(codefile, "test")
+}
 
-    Ok(datafile.to_str().ok_or(format!("OsStr {:?} -> str failed?", datafile))?
-        .to_string()
-        + "/" + name)
+fn get_data_file(codefile: &str, kind: &str) -> AocResult<String> {
+    let stem = Path::new(codefile)
+        .file_stem()
+        .ok_or(format!("No stem for {codefile}?"))?;
+    let datafile = "data/".to_string()
+        + stem
+            .to_str()
+            .ok_or(format!("OsStr {stem:?} -> str failed?"))?
+        + "_"
+        + kind
+        + ".txt";
+    Ok(datafile)
 }
 
 #[derive(Debug, Clone)]

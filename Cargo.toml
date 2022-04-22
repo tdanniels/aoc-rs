@@ -7,61 +7,61 @@ edition = "2021"
 aoc-util = { path = "aoc_util" }
 
 [[bin]]
-name = "day_01"
-path = "day_01/src/main.rs"
+name = "01"
+path = "src/01.rs"
 
 [[bin]]
-name = "day_02"
-path = "day_02/src/main.rs"
+name = "02"
+path = "src/02.rs"
 
 [[bin]]
-name = "day_03"
-path = "day_03/src/main.rs"
+name = "03"
+path = "src/03.rs"
 
 [[bin]]
-name = "day_04"
-path = "day_04/src/main.rs"
+name = "04"
+path = "src/04.rs"
 
 [[bin]]
-name = "day_05"
-path = "day_05/src/main.rs"
+name = "05"
+path = "src/05.rs"
 
 [[bin]]
-name = "day_06"
-path = "day_06/src/main.rs"
+name = "06"
+path = "src/06.rs"
 
 [[bin]]
-name = "day_07"
-path = "day_07/src/main.rs"
+name = "07"
+path = "src/07.rs"
 
 [[bin]]
-name = "day_08"
-path = "day_08/src/main.rs"
+name = "08"
+path = "src/08.rs"
 
 [[bin]]
-name = "day_09"
-path = "day_09/src/main.rs"
+name = "09"
+path = "src/09.rs"
 
 [[bin]]
-name = "day_10"
-path = "day_10/src/main.rs"
+name = "10"
+path = "src/10.rs"
 
 [[bin]]
-name = "day_11"
-path = "day_11/src/main.rs"
+name = "11"
+path = "src/11.rs"
 
 [[bin]]
-name = "day_12"
-path = "day_12/src/main.rs"
+name = "12"
+path = "src/12.rs"
 
 [[bin]]
-name = "day_13"
-path = "day_13/src/main.rs"
+name = "13"
+path = "src/13.rs"
 
 [[bin]]
-name = "day_14"
-path = "day_14/src/main.rs"
+name = "14"
+path = "src/14.rs"
 
 [[bin]]
-name = "day_15"
-path = "day_15/src/main.rs"
+name = "15"
+path = "src/15.rs"

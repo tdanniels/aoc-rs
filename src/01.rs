@@ -72,22 +72,37 @@ impl DepthMeasurements<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use aoc_util::get_data_file;
+    use aoc_util::{get_input_file, get_test_file};
 
     #[test]
-    fn part_1() -> AocResult<()> {
-        dbg!(file!());
-        let testfile = get_data_file("test.txt")?;
+    fn part_1_test() -> AocResult<()> {
+        let testfile = get_test_file(file!())?;
         let dm = DepthMeasurements::new(&testfile);
         assert_eq!(dm.count_depth_increases(1), 7);
         Ok(())
     }
 
     #[test]
-    fn part_2() -> AocResult<()> {
-        let testfile = get_data_file("test.txt")?;
+    fn part_2_test() -> AocResult<()> {
+        let testfile = get_test_file(file!())?;
         let dm = DepthMeasurements::new(&testfile);
         assert_eq!(dm.count_depth_increases(3), 5);
+        Ok(())
+    }
+
+    #[test]
+    fn part_1_input() -> AocResult<()> {
+        let testfile = get_input_file(file!())?;
+        let dm = DepthMeasurements::new(&testfile);
+        assert_eq!(dm.count_depth_increases(1), 1754);
+        Ok(())
+    }
+
+    #[test]
+    fn part_2_input() -> AocResult<()> {
+        let testfile = get_input_file(file!())?;
+        let dm = DepthMeasurements::new(&testfile);
+        assert_eq!(dm.count_depth_increases(3), 1789);
         Ok(())
     }
 }
