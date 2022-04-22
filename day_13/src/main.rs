@@ -1,9 +1,7 @@
-use aoc_util::{failure, AocResult};
+use aoc_util::{failure, get_cli_arg, AocResult};
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::{self, BufRead};
-
-static FILENAME: &str = "input.txt";
 
 type Paper = HashSet<(usize, usize)>;
 
@@ -110,7 +108,7 @@ fn part_2(paper: &Paper, folds: &Folds) -> AocResult<String> {
 }
 
 fn main() -> AocResult<()> {
-    let (paper, folds) = parse_input(FILENAME)?;
+    let (paper, folds) = parse_input(&get_cli_arg()?)?;
     println!("Part 1: {}", part_1(&paper, &folds)?);
     println!("Part 2:\n{}", part_2(&paper, &folds)?);
 

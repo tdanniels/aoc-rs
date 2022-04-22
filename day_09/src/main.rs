@@ -1,7 +1,5 @@
-use aoc_util::{AocResult, Grid, Point};
+use aoc_util::{get_cli_arg, AocResult, Grid, Point};
 use std::collections::{BinaryHeap, HashSet, VecDeque};
-
-static FILENAME: &str = "input.txt";
 
 pub fn find_low_points(grid: &Grid) -> AocResult<Vec<((usize, usize), u64)>> {
     let mut out = Vec::new();
@@ -75,7 +73,7 @@ fn part2(grid: &Grid) -> AocResult<u64> {
 }
 
 fn main() -> AocResult<()> {
-    let grid: Grid = Grid::from_digit_matrix_file(FILENAME)?;
+    let grid: Grid = Grid::from_digit_matrix_file(&get_cli_arg()?)?;
 
     println!("Part 1: {}", part1(&grid)?);
     println!("Part 2: {}", part2(&grid)?);

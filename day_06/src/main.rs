@@ -1,11 +1,7 @@
-use std::error;
+use aoc_util::{get_cli_arg, AocResult};
 use std::fs;
 
-static FILENAME: &str = "input.txt";
-
-type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
-
-fn solve(filename: &str, n_iters: u32) -> Result<u64> {
+fn solve(filename: &str, n_iters: u32) -> AocResult<u64> {
     let mut buckets: [[u64; 9]; 2] = [[0; 9]; 2];
     let mut active_idx = 1;
     let input: Vec<u64> = fs::read_to_string(filename)?
@@ -38,9 +34,9 @@ fn solve(filename: &str, n_iters: u32) -> Result<u64> {
     Ok(buckets[active_idx ^ 1].iter().sum())
 }
 
-fn main() -> Result<()> {
-    println!("Part 1: {}", solve(FILENAME, 80)?);
-    println!("Part 2: {}", solve(FILENAME, 256)?);
+fn main() -> AocResult<()> {
+    println!("Part 1: {}", solve(&get_cli_arg()?, 80)?);
+    println!("Part 2: {}", solve(&get_cli_arg()?, 256)?);
 
     Ok(())
 }

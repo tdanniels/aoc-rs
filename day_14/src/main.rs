@@ -1,9 +1,7 @@
-use aoc_util::{failure, AocResult};
+use aoc_util::{failure, get_cli_arg, AocResult};
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{self, BufRead};
-
-static FILENAME: &str = "input.txt";
 
 type Pair = [u8; 2];
 
@@ -115,7 +113,7 @@ fn solve(template: &str, rules: &Rules, n_steps: u32) -> AocResult<usize> {
 }
 
 fn main() -> AocResult<()> {
-    let (template, rules) = parse_input(FILENAME)?;
+    let (template, rules) = parse_input(&get_cli_arg()?)?;
     println!("Part 1: {}", solve(&template, &rules, 10)?);
     println!("Part 2: {}", solve(&template, &rules, 40)?);
 

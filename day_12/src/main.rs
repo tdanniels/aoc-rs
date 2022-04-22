@@ -1,7 +1,5 @@
-use aoc_util::{AocResult, UnweightedUndirectedGraph};
+use aoc_util::{get_cli_arg, AocResult, UnweightedUndirectedGraph};
 use std::collections::HashSet;
-
-static FILENAME: &str = "input.txt";
 
 /// It appears to be an unstated fact of this problem that large caves
 /// are never directly connected to other large caves, otherwise there would
@@ -61,7 +59,7 @@ fn count_paths_to_end(
 }
 
 fn main() -> AocResult<()> {
-    let graph = UnweightedUndirectedGraph::from_file(FILENAME)?;
+    let graph = UnweightedUndirectedGraph::from_file(&get_cli_arg()?)?;
     println!("Part 1: {}", part_1(&graph)?);
     println!("Part 2: {}", part_2(&graph)?);
 

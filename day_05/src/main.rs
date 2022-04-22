@@ -1,4 +1,4 @@
-use aoc_util::{AocResult, failure};
+use aoc_util::{failure, get_cli_arg, AocResult};
 use std::cmp;
 use std::collections::HashMap;
 use std::fs::File;
@@ -6,11 +6,9 @@ use std::io::{self, BufRead};
 use std::num::ParseIntError;
 use std::str::FromStr;
 
-static FILENAME: &str = "input.txt";
-
 fn main() -> AocResult<()> {
-    println!("Part 1: {}", part1(FILENAME)?);
-    println!("Part 2: {}", part2(FILENAME)?);
+    println!("Part 1: {}", part1(&get_cli_arg()?)?);
+    println!("Part 2: {}", part2(&get_cli_arg()?)?);
 
     Ok(())
 }

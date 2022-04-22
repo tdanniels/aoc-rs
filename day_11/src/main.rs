@@ -1,8 +1,6 @@
-use aoc_util::{AocResult, Grid, Point};
+use aoc_util::{get_cli_arg, AocResult, Grid, Point};
 use std::cmp;
 use std::collections::HashSet;
-
-static FILENAME: &str = "input.txt";
 
 fn sim(grid: &mut Grid) -> AocResult<u64> {
     let mut flashes = 0;
@@ -77,7 +75,7 @@ fn solve(filename: &str) -> AocResult<(u64, u64)> {
 }
 
 fn main() -> AocResult<()> {
-    let (count, sync) = solve(FILENAME)?;
+    let (count, sync) = solve(&get_cli_arg()?)?;
     println!("Part 1: {}", count);
     println!("Part 2: {}", sync);
 

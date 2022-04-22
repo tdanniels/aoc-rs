@@ -1,13 +1,12 @@
+use aoc_util::{get_cli_arg, AocResult};
 use std::fs::File;
 use std::io::{self, BufRead};
 
-static FILENAME: &str = "input.txt";
-
-fn main() {
+fn main() -> AocResult<()> {
     {
         let mut depth = 0i64;
         let mut pos = 0i64;
-        let file = File::open(FILENAME).unwrap();
+        let file = File::open(get_cli_arg()?).unwrap();
         let lines = io::BufReader::new(file).lines();
 
         for line in lines {
@@ -25,7 +24,7 @@ fn main() {
         let mut depth = 0i64;
         let mut pos = 0i64;
         let mut aim = 0i64;
-        let file = File::open(FILENAME).unwrap();
+        let file = File::open(get_cli_arg()?).unwrap();
         let lines = io::BufReader::new(file).lines();
 
         for line in lines {
@@ -42,4 +41,5 @@ fn main() {
         }
         println!("Part 2: {}", depth * pos);
     }
+    Ok(())
 }

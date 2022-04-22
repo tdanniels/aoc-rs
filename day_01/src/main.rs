@@ -1,12 +1,14 @@
+use aoc_util::{get_cli_arg, AocResult};
 use std::fs::File;
 use std::io::{self, BufRead};
 
-static FILENAME: &str = "input.txt";
-
-fn main() {
-    let dm = DepthMeasurements::new(FILENAME);
+fn main() -> AocResult<()> {
+    let filename = get_cli_arg()?;
+    let dm = DepthMeasurements::new(&filename);
     println!("Part 1: {}", dm.count_depth_increases(1));
     println!("Part 2: {}", dm.count_depth_increases(3));
+
+    Ok(())
 }
 
 #[derive(Debug, Clone)]
@@ -35,9 +37,7 @@ struct DepthMeasurements<'a> {
 
 impl DepthMeasurements<'_> {
     fn new(data_filename: &str) -> DepthMeasurements {
-        DepthMeasurements {
-            data_filename: data_filename,
-        }
+        DepthMeasurements { data_filename }
     }
 
     fn count_depth_increases(&self, filter_width: i32) -> i32 {

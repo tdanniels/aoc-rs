@@ -1,13 +1,9 @@
+use aoc_util::{failure, get_cli_arg, AocResult};
 use std::collections::{HashMap, HashSet};
-use std::error;
 use std::fs::File;
-use std::io::{self, BufRead, Error, ErrorKind};
+use std::io::{self, BufRead};
 
-static FILENAME: &str = "input.txt";
-
-type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
-
-fn solve_part1(lines: &Vec<String>, segct2digs: &[Vec<u8>; 8]) -> Result<u64> {
+fn solve_part1(lines: &Vec<String>, segct2digs: &[Vec<u8>; 8]) -> AocResult<u64> {
     let res = lines
         .iter()
         .map(|l| {
@@ -21,12 +17,12 @@ fn solve_part1(lines: &Vec<String>, segct2digs: &[Vec<u8>; 8]) -> Result<u64> {
                 }
             }))
         })
-        .sum::<Result<u64>>()?;
+        .sum::<AocResult<u64>>()?;
 
     Ok(res)
 }
 
-fn solve_part2(lines: &Vec<String>) -> Result<u64> {
+fn solve_part2(lines: &Vec<String>) -> AocResult<u64> {
     // Deduction:
     // Initially known: sigs(1), sigs(4), sigs(7), sigs(8)
     // == 1478
@@ -94,10 +90,7 @@ fn solve_part2(lines: &Vec<String>) -> Result<u64> {
                 .find(|p| p.chars().find(|c| c == sig_c).is_none() && p.len() == len)
                 .ok_or(format!("No pattern found for {}?", digit))?;
             if sigpat2digit.insert(pattern, digit).is_some() {
-                return Err(Box::new(Error::new(
-                    ErrorKind::Other,
-                    format!("Overwrote the pattern for {}", digit),
-                )));
+                return failure(format!("Overwrote the pattern for {}", digit));
             }
         }
 
@@ -114,10 +107,7 @@ fn solve_part2(lines: &Vec<String>) -> Result<u64> {
                 .find(|p| p.chars().find(|c| c == sig_f).is_none() && p.len() == len)
                 .ok_or(format!("No pattern found for {}?", digit))?;
             if sigpat2digit.insert(pattern, digit).is_some() {
-                return Err(Box::new(Error::new(
-                    ErrorKind::Other,
-                    format!("Overwrote the pattern for {}", digit),
-                )));
+                return failure(format!("Overwrote the pattern for {}", digit));
             }
         }
 
@@ -133,10 +123,7 @@ fn solve_part2(lines: &Vec<String>) -> Result<u64> {
                 })
                 .ok_or(format!("No pattern found for {}?", digit))?;
             if sigpat2digit.insert(pattern, digit).is_some() {
-                return Err(Box::new(Error::new(
-                    ErrorKind::Other,
-                    format!("Overwrote the pattern for {}", digit),
-                )));
+                return failure(format!("Overwrote the pattern for {}", digit));
             }
         }
 
@@ -166,24 +153,18 @@ fn solve_part2(lines: &Vec<String>) -> Result<u64> {
                 .find(|p| p.chars().find(|c| c == sig_e).is_none() && p.len() == len)
                 .ok_or(format!("No pattern found for {}?", digit))?;
             if sigpat2digit.insert(pattern, digit).is_some() {
-                return Err(Box::new(Error::new(
-                    ErrorKind::Other,
-                    format!("Overwrote the pattern for {}", digit),
-                )));
+                return failure(format!("Overwrote the pattern for {}", digit));
             }
         }
 
-        //0. sigs(0) the last remaining signal of length 6.
+        // 0. sigs(0) the last remaining signal of length 6.
         for (digit, len) in [(0, 6)] {
             let pattern = signal_patterns
                 .iter()
                 .find(|p| p.len() == len && sigpat2digit.iter().find(|(k, _)| k == p).is_none())
                 .ok_or(format!("No pattern found for {}?", digit))?;
             if sigpat2digit.insert(pattern, digit).is_some() {
-                return Err(Box::new(Error::new(
-                    ErrorKind::Other,
-                    format!("Overwrote the pattern for {}", digit),
-                )));
+                return failure(format!("Overwrote the pattern for {}", digit));
             }
         }
         sum += 1000 * sigpat2digit.get(encoded_digits[0].as_str()).unwrap()
@@ -195,7 +176,7 @@ fn solve_part2(lines: &Vec<String>) -> Result<u64> {
     Ok(sum)
 }
 
-fn prep_line(line: &str) -> Result<(Vec<String>, Vec<String>)> {
+fn prep_line(line: &str) -> AocResult<(Vec<String>, Vec<String>)> {
     let mut out: Vec<Vec<String>> = Vec::new();
 
     for s in line.trim().split('|') {
@@ -212,15 +193,12 @@ fn prep_line(line: &str) -> Result<(Vec<String>, Vec<String>)> {
         );
     }
     if out.len() != 2 {
-        return Err(Box::new(Error::new(
-            ErrorKind::Other,
-            "Require exactly two input chunks",
-        )));
+        return failure("Require exactly two input chunks");
     }
     Ok((out.swap_remove(0), out.swap_remove(0)))
 }
 
-fn main() -> Result<()> {
+fn main() -> AocResult<()> {
     let segct2digs: [Vec<u8>; 8] = [
         vec![],
         vec![],
@@ -232,7 +210,7 @@ fn main() -> Result<()> {
         vec![8],
     ];
 
-    let file = File::open(FILENAME)?;
+    let file = File::open(&get_cli_arg()?)?;
     let lines: Vec<String> = io::BufReader::new(file)
         .lines()
         .collect::<io::Result<_>>()?;

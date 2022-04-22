@@ -1,11 +1,11 @@
+use aoc_util::{get_cli_arg, AocResult};
 use std::fs::File;
 use std::io::{self, BufRead};
 
-static FILENAME: &str = "input.txt";
-
-fn main() {
-    println!("Part 1: {}", part1(FILENAME));
-    println!("Part 2: {}", part2(FILENAME));
+fn main() -> AocResult<()> {
+    println!("Part 1: {}", part1(&get_cli_arg()?));
+    println!("Part 2: {}", part2(&get_cli_arg()?));
+    Ok(())
 }
 
 #[derive(Debug, Clone)]

@@ -1,8 +1,6 @@
-use aoc_util::{failure, AocResult};
+use aoc_util::{failure, get_cli_arg, AocResult};
 use std::fs::File;
 use std::io::{self, BufRead};
-
-static FILENAME: &str = "input.txt";
 
 fn illegal_char_score(c: char) -> AocResult<u64> {
     match c {
@@ -107,7 +105,7 @@ fn part_2(lines: &Vec<String>) -> AocResult<u64> {
 }
 
 fn main() -> AocResult<()> {
-    let file = File::open(FILENAME)?;
+    let file = File::open(&get_cli_arg()?)?;
     let lines: Vec<String> = io::BufReader::new(file)
         .lines()
         .collect::<io::Result<_>>()?;

@@ -1,10 +1,6 @@
+use aoc_util::{failure, get_cli_arg, AocResult};
 use std::fs::File;
 use std::io::{self, BufRead};
-use std::io::{Error, ErrorKind};
-
-static FILENAME: &str = "input.txt";
-
-type DRes<T> = Result<T, Box<dyn std::error::Error>>;
 
 #[derive(Debug, Clone, Copy)]
 struct Square {
@@ -86,9 +82,9 @@ impl Board {
     }
 }
 
-fn main() -> DRes<()> {
-    println!("Part 1: {}", part1(FILENAME)?);
-    println!("Part 2: {}", part2(FILENAME)?);
+fn main() -> AocResult<()> {
+    println!("Part 1: {}", part1(&get_cli_arg()?)?);
+    println!("Part 2: {}", part2(&get_cli_arg()?)?);
 
     Ok(())
 }
@@ -97,7 +93,7 @@ fn parse_chosen_numbers(numbers: &str) -> Result<Vec<i32>, <i32 as std::str::Fro
     numbers.split(',').map(|x| x.parse::<i32>()).collect()
 }
 
-fn parse_boards(lines: impl Iterator<Item = std::io::Result<String>>) -> DRes<Vec<Board>> {
+fn parse_boards(lines: impl Iterator<Item = std::io::Result<String>>) -> AocResult<Vec<Board>> {
     let mut row = 0;
     let mut board = Board::new();
     let mut boards: Vec<Board> = Vec::new();
@@ -106,10 +102,7 @@ fn parse_boards(lines: impl Iterator<Item = std::io::Result<String>>) -> DRes<Ve
         let line = line?;
         if line.trim().is_empty() {
             if row != 0 && row != 5 {
-                return Err(Box::new(Error::new(
-                    ErrorKind::Other,
-                    "Blank line in partial board",
-                )));
+                return failure("Blank line in partial board");
             }
             row = 0;
             continue;
@@ -118,19 +111,13 @@ fn parse_boards(lines: impl Iterator<Item = std::io::Result<String>>) -> DRes<Ve
         let mut col = 0;
         for num in line.split_whitespace() {
             if col > 4 {
-                return Err(Box::new(Error::new(
-                    ErrorKind::Other,
-                    "Too many squares in a row",
-                )));
+                return failure("Too many squares in a row");
             }
             board.squares[5 * row + col] = Square::from_int(num.parse::<i32>()?);
             col += 1;
         }
         if col != 5 {
-            return Err(Box::new(Error::new(
-                ErrorKind::Other,
-                "Too few numbers in a row",
-            )));
+            return failure("Too few numbers in a row");
         }
 
         row += 1;
@@ -139,17 +126,14 @@ fn parse_boards(lines: impl Iterator<Item = std::io::Result<String>>) -> DRes<Ve
             boards.push(board);
             board = Board::new();
         } else if row > 5 {
-            return Err(Box::new(Error::new(
-                ErrorKind::Other,
-                "Too many rows in a board",
-            )));
+            return failure("Too many rows in a board");
         }
     }
 
     Ok(boards)
 }
 
-fn part1(filename: &str) -> DRes<i64> {
+fn part1(filename: &str) -> AocResult<i64> {
     let file = File::open(filename)?;
     let mut lines = io::BufReader::new(&file).lines();
 
@@ -167,10 +151,10 @@ fn part1(filename: &str) -> DRes<i64> {
         }
     }
 
-    return Err(Box::new(Error::new(ErrorKind::Other, "No wins!")));
+    return failure("No wins!");
 }
 
-fn part2(filename: &str) -> DRes<i64> {
+fn part2(filename: &str) -> AocResult<i64> {
     let file = File::open(filename)?;
     let mut lines = io::BufReader::new(&file).lines();
 
@@ -197,5 +181,5 @@ fn part2(filename: &str) -> DRes<i64> {
             }
         }
     }
-    Err(Box::new(Error::new(ErrorKind::Other, "No wins!")))
+    failure("No wins!")
 }

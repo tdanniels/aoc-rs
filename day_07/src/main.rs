@@ -1,16 +1,12 @@
-use std::error;
+use aoc_util::{get_cli_arg, AocResult};
 use std::fs;
-
-static FILENAME: &str = "input.txt";
-
-type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 
 enum Cost {
     Linear,
     Quadratic,
 }
 
-fn solve(filename: &str, cost: Cost) -> Result<i64> {
+fn solve(filename: &str, cost: Cost) -> AocResult<i64> {
     let input: Vec<i64> = fs::read_to_string(filename)?
         .trim()
         .split(',')
@@ -35,9 +31,9 @@ fn solve(filename: &str, cost: Cost) -> Result<i64> {
     Ok(min_fuel)
 }
 
-fn main() -> Result<()> {
-    println!("Part 1: {}", solve(FILENAME, Cost::Linear)?);
-    println!("Part 2: {}", solve(FILENAME, Cost::Quadratic)?);
+fn main() -> AocResult<()> {
+    println!("Part 1: {}", solve(&get_cli_arg()?, Cost::Linear)?);
+    println!("Part 2: {}", solve(&get_cli_arg()?, Cost::Quadratic)?);
 
     Ok(())
 }

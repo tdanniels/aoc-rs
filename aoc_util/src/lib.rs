@@ -1,8 +1,17 @@
 use std::collections::{HashMap, HashSet};
+use std::env;
 use std::error;
 use std::fmt;
 use std::fs::File;
-use std::io::{self, BufRead, Error, ErrorKind};
+use std::io::{self, BufRead};
+
+pub fn get_cli_arg() -> AocResult<String> {
+    let mut args: Vec<String> = env::args().collect();
+    if args.len() != 2 {
+        return failure(format!("Bad CLI args: {:?}", args));
+    }
+    Ok(args.pop().unwrap())
+}
 
 #[derive(Debug, Clone)]
 pub struct AocError {
@@ -39,7 +48,7 @@ pub struct Point {
 
 impl Point {
     pub fn new(i: usize, j: usize) -> Self {
-        Point { i: i, j: j }
+        Point { i, j }
     }
     pub fn from_pair(pair: (usize, usize)) -> Self {
         Point {
@@ -77,10 +86,7 @@ impl Grid {
         let num_rows = lines.len();
         let num_cols = lines.get(0).ok_or("First row empty?")?.len();
         if !lines.iter().all(|l| l.len() == num_cols) {
-            return Err(Box::new(Error::new(
-                ErrorKind::Other,
-                "Not all rows have the same number of columns.",
-            )));
+            return failure("Not all rows have the same number of columns.");
         }
         let cells: Vec<u8> = lines
             .iter()
@@ -96,9 +102,9 @@ impl Grid {
             })
             .collect::<Result<Vec<_>, _>>()?;
         Ok(Grid {
-            cells: cells,
-            num_rows: num_rows,
-            num_cols: num_cols,
+            cells,
+            num_rows,
+            num_cols,
         })
     }
 
@@ -233,14 +239,15 @@ impl UnweightedUndirectedGraph {
             ));
         }
         Ok(UnweightedUndirectedGraph {
-            nodes: nodes,
-            edges: edges,
-            node2index: node2index,
+            nodes,
+            edges,
+            node2index,
         })
     }
 
     pub fn index(&self, node: &str) -> AocResult<usize> {
-        Ok(self.node2index
+        Ok(self
+            .node2index
             .get(node)
             .ok_or(format!("No such node {}", node))
             .map(|x| *x)?)
