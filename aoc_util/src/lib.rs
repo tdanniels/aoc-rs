@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::env;
 use std::error;
 use std::fmt;
@@ -94,6 +94,22 @@ pub struct Grid {
     num_cols: usize,
 }
 
+impl fmt::Display for Grid {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut s = String::new();
+        for i in 0..self.num_rows {
+            for j in 0..self.num_cols {
+                s += self.cells[i * self.num_cols + j].to_string().as_str();
+                if j == self.num_cols - 1 && i != self.num_rows - 1 {
+                    s += "\n";
+                }
+            }
+        }
+        write!(f, "{}", s)
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
 pub enum NeighbourPattern {
     /// N W E S
     Compass4,
@@ -136,6 +152,26 @@ impl Grid {
             num_rows,
             num_cols,
         })
+    }
+
+    pub fn from_vec(v: Vec<u8>, num_rows: usize, num_cols: usize) -> AocResult<Self> {
+        if v.len() != num_rows * num_cols {
+            return failure(format!(
+                "Vec len {} doesn't equal num_rows={} * num_cols={}",
+                v.len(),
+                num_rows,
+                num_cols
+            ));
+        }
+        Ok(Grid {
+            cells: v,
+            num_rows,
+            num_cols,
+        })
+    }
+
+    pub fn vec(&self) -> &Vec<u8> {
+        &self.cells
     }
 
     pub fn num_rows(&self) -> usize {
@@ -213,6 +249,82 @@ impl Grid {
             }
         }
         Ok(out)
+    }
+
+    fn point_from_index(&self, index: usize) -> AocResult<Point> {
+        if index >= self.num_rows * self.num_cols {
+            return failure(format!("Invalid index {index}"));
+        }
+        Ok(Point::new(index / self.num_rows, index % self.num_cols))
+    }
+
+    fn index_from_point(&self, point: Point) -> AocResult<usize> {
+        if point.i >= self.num_rows || point.j >= self.num_cols {
+            return failure(format!("Invalid coordinates {}", point));
+        }
+        Ok(self.num_cols * point.i + point.j)
+    }
+
+    pub fn dijkstra(
+        &self,
+        start: Point,
+        finish: Point,
+        neighbour_pattern: NeighbourPattern,
+    ) -> AocResult<(Vec<Point>, Option<u64>)> {
+        let mut dist: Vec<Option<u64>> = vec![None; self.num_rows * self.num_cols];
+        let mut prev: Vec<Option<usize>> = vec![None; self.num_rows * self.num_cols];
+        let mut q: VecDeque<usize> = (0..self.num_rows * self.num_cols).collect();
+        let start_index = self.index_from_point(start)?;
+        let finish_index = self.index_from_point(finish)?;
+
+        dist[start_index] = Some(0);
+
+        while q.len() != 0 {
+            let (u_remove_index, &u_index) = q
+                .iter()
+                .enumerate()
+                .min_by_key(|(_, k)| if let Some(d) = dist[**k] { d } else { u64::MAX })
+                .ok_or("No min?")?;
+            if u_index == finish_index {
+                break;
+            }
+            if q.remove(u_remove_index).is_none() {
+                return failure(format!("Failed to remove q[{u_index}]"));
+            }
+
+            let u_point = self.point_from_index(u_index)?;
+            for v in self.neighbourhood(u_point, neighbour_pattern)? {
+                if let Some(v) = v {
+                    let v_index = self.index_from_point(v.0)?;
+                    if let Some(v_index) = q.iter().find(|&&x| x == v_index) {
+                        let alt = {
+                            if let Some(d) = dist[u_index] {
+                                d + v.1 as u64
+                            } else {
+                                u64::MAX
+                            }
+                        };
+
+                        if alt < dist[*v_index].map_or(u64::MAX, |x| x) {
+                            dist[*v_index] = Some(alt);
+                            prev[*v_index] = Some(u_index);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Construct the shortest path Vec
+        let mut out: VecDeque<Point> = VecDeque::new();
+        let mut u_index = Some(finish_index);
+        if prev[u_index.unwrap()].is_some() || u_index.unwrap() == start_index {
+            while u_index.is_some() {
+                out.push_front(self.point_from_index(u_index.unwrap())?);
+                u_index = prev[u_index.unwrap()];
+            }
+        }
+
+        Ok((out.drain(..).collect(), dist[finish_index]))
     }
 }
 
