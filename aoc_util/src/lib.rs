@@ -43,9 +43,9 @@ pub struct AocError {
 }
 
 impl AocError {
-    fn new(err: &str) -> Self {
+    pub fn new<S: AsRef<str>>(err: S) -> Self {
         AocError {
-            err: err.to_string(),
+            err: err.as_ref().to_string(),
         }
     }
 }
