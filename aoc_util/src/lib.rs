@@ -90,7 +90,7 @@ impl fmt::Display for Point {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Grid {
     cells: Vec<u8>,
     num_rows: usize,
@@ -127,6 +127,7 @@ pub enum NeighbourPattern {
 ///  .    .    .
 ///  .    .    .
 impl Grid {
+    // TODO: update to use a an iterable of String instead of `filename`.
     pub fn from_digit_matrix_file(filename: &str) -> AocResult<Self> {
         let file = File::open(filename)?;
         let lines: Vec<String> = io::BufReader::new(file)
@@ -148,6 +149,29 @@ impl Grid {
                     )
                     .map_err(|e| AocError::new(&e.to_string()))
                 })
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(Grid {
+            cells,
+            num_rows,
+            num_cols,
+        })
+    }
+
+    pub fn from_symbol_matrix<F>(lines: &[String], map_func: F) -> AocResult<Self>
+    where
+        F: Fn(char) -> Option<u8>,
+    {
+        let num_rows = lines.len();
+        let num_cols = lines.get(0).ok_or("First row empty?")?.len();
+        if !lines.iter().all(|l| l.len() == num_cols) {
+            return failure("Not all rows have the same number of columns.");
+        }
+        let cells: Vec<u8> = lines
+            .iter()
+            .flat_map(|s| {
+                s.chars()
+                    .map(|c| map_func(c).ok_or(format!("Bad char {c}")))
             })
             .collect::<Result<Vec<_>, _>>()?;
         Ok(Grid {
@@ -326,6 +350,29 @@ impl Grid {
 
         Ok((out.drain(..).collect(), dist[finish_index]))
     }
+
+    pub fn add_border(&mut self, border_size: usize, border_fill: u8) {
+        if border_size == 0 {
+            return;
+        }
+        let new_len = (self.num_rows + border_size * 2) * (self.num_cols + border_size * 2);
+        let mut new_cells = Vec::with_capacity(new_len);
+        new_cells.resize(new_len, border_fill);
+        let mut new_grid = Grid::from_vec(
+            new_cells,
+            self.num_rows + border_size * 2,
+            self.num_cols + border_size * 2,
+        )
+        .unwrap();
+        for i in 0..self.num_rows() {
+            for j in 0..self.num_cols() {
+                let p_old = Point::new(i, j);
+                let p_new = Point::new(border_size + i, border_size + j);
+                new_grid.set(p_new, self.at(p_old).unwrap()).unwrap();
+            }
+        }
+        *self = new_grid;
+    }
 }
 
 #[derive(Eq)]
@@ -349,6 +396,44 @@ impl PartialOrd for DistIdx {
 impl PartialEq for DistIdx {
     fn eq(&self, other: &Self) -> bool {
         self.dist == other.dist
+    }
+}
+
+#[cfg(test)]
+mod grid_tests {
+    use super::*;
+
+    #[test]
+    fn grid_border() -> AocResult<()> {
+        #[rustfmt::skip]
+        let mut grid = Grid::from_vec(vec![
+            1, 2, 3,
+            4, 5, 6], 2, 3)?;
+        grid.add_border(2, 9);
+        #[rustfmt::skip]
+        let mut grid2 = Grid::from_vec(vec![
+            9, 9, 9, 9, 9, 9, 9,
+            9, 9, 9, 9, 9, 9, 9,
+            9, 9, 1, 2, 3, 9, 9,
+            9, 9, 4, 5, 6, 9, 9,
+            9, 9, 9, 9, 9, 9, 9,
+            9, 9, 9, 9, 9, 9, 9,
+        ], 6, 7)?;
+        assert_eq!(grid, grid2);
+        grid2.add_border(1, 0);
+        #[rustfmt::skip]
+        let grid3 = Grid::from_vec(vec![
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 9, 9, 9, 9, 9, 9, 9, 0,
+            0, 9, 9, 9, 9, 9, 9, 9, 0,
+            0, 9, 9, 1, 2, 3, 9, 9, 0,
+            0, 9, 9, 4, 5, 6, 9, 9, 0,
+            0, 9, 9, 9, 9, 9, 9, 9, 0,
+            0, 9, 9, 9, 9, 9, 9, 9, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+        ], 8, 9)?;
+        assert_eq!(grid2, grid3);
+        Ok(())
     }
 }
 
@@ -641,7 +726,7 @@ impl Iterator for DepthFirstIterator {
 }
 
 #[cfg(test)]
-mod tests {
+mod nodewrapper_tests {
     use super::*;
 
     #[test]
