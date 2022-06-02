@@ -34,7 +34,7 @@ impl Amph {
 
 #[derive(Clone, Copy, Debug)]
 enum Location {
-    /// (room_idx \in 0..4, room_part_idx \in 0..2)
+    /// (room_idx \in 0..4, room_part_idx \in 0..room_depth)
     Room((usize, usize)),
     // hall_idx \in 0..11
     Hall(usize),
@@ -59,23 +59,23 @@ impl Move {
 #[derive(Clone, Debug)]
 struct Instance {
     /// rooms[i][j] is room i, room_part j. room_part[0] is closest to the hall.
-    rooms: [[Option<Amph>; 2]; 4],
+    rooms: [Vec<Option<Amph>>; 4],
     /// Maps from room index i to the hall part that connects to it.
     room2hall: [usize; 4],
     hall: Vec<Option<Amph>>,
+    room_depth: usize,
 }
 
 impl Instance {
     /// Returns the path travelled along mv.from -> mv.to. Does not include the starting
     /// location, mv.from. Ignores collision with Amphs.
     fn path(&self, mv: Move) -> Vec<Location> {
-        let mut path = Vec::with_capacity(10);
+        let mut path = Vec::with_capacity(14);
         match (mv.from, mv.to) {
             (Room(from), Room(to)) => {
                 assert_ne!(from.0, to.0);
-
-                if from.1 == 1 {
-                    path.push(Room((from.0, 0)));
+                for i in (0..from.1).rev() {
+                    path.push(Room((from.0, i)));
                 }
 
                 let hall_start = self.room2hall[from.0];
@@ -88,15 +88,13 @@ impl Instance {
                 };
                 path.extend(hall_vec);
 
-                path.push(Room((to.0, 0)));
-
-                if to.1 == 1 {
-                    path.push(Room((to.0, 1)));
+                for i in 0..=to.1 {
+                    path.push(Room((to.0, i)));
                 }
             }
             (Room(from), Hall(to)) => {
-                if from.1 == 1 {
-                    path.push(Room((from.0, 0)));
+                for i in (0..from.1).rev() {
+                    path.push(Room((from.0, i)));
                 }
 
                 let hall_start = self.room2hall[from.0];
@@ -120,10 +118,8 @@ impl Instance {
                 };
                 path.extend(hall_vec);
 
-                path.push(Room((to.0, 0)));
-
-                if to.1 == 1 {
-                    path.push(Room((to.0, 1)));
+                for i in 0..=to.1 {
+                    path.push(Room((to.0, i)));
                 }
             }
             (Hall(_), Hall(_)) => panic!("Invalid hall to hall move {:?}", mv),
@@ -176,41 +172,55 @@ impl Instance {
             .iter()
             .flatten()
             .enumerate()
-            .map(|(i, a)| (i / 2, i % 2, a))
+            .map(|(i, a)| (i / self.room_depth, i % self.room_depth, a))
             .partition(|(_, _, a)| a.is_some());
+        assert_eq!(
+            room_parts_occupied.len() + hall_occupied.len(),
+            self.room_depth * 4
+        );
+        assert_eq!(room_parts_unoccupied.len() + hall_unoccupied.len(), 11 - 4);
+
         for (h, a) in &hall_occupied {
             for (i, j, _) in &room_parts_unoccupied {
                 if a.unwrap().dest() == *i {
-                    if *j == 0 {
-                        if let Some(b) = self.rooms[*i][*j + 1] {
-                            // Ensure room is occupied only by other Amphs of the same variant.
-                            if (**a).unwrap() != b {
-                                continue;
-                            }
-                        } else {
-                            // Always move as deep into the room possible.
-                            continue;
+                    let mut valid_move = true;
+                    for k in j + 1..self.room_depth {
+                        // Always move as deep into the room as possible.
+                        // Ensure room is occupied only by other Amphs of the same variant.
+                        let b = self.rooms[*i][k];
+                        if b.is_none() || (b.is_some() && b != **a) {
+                            valid_move = false;
+                            break;
                         }
                     }
-                    let mv = Move::new(a.unwrap(), Hall(*h), Room((*i, *j)));
-                    if let Some(cost) = self.cost(mv) {
-                        moves.push((mv, cost));
+                    if valid_move {
+                        let mv = Move::new(a.unwrap(), Hall(*h), Room((*i, *j)));
+                        if let Some(cost) = self.cost(mv) {
+                            moves.push((mv, cost));
+                        }
                     }
                 }
             }
         }
         for (i, j, a) in &room_parts_occupied {
             for (h, _) in &hall_unoccupied {
-                // No need to move if we're already a) at the back of the destination room, or
-                // b) at the front with another Amph of the same variant behind us.
-                if (*j == 1 && a.unwrap().dest() == *i)
-                    || (*j == 0 && a.unwrap().dest() == *i && self.rooms[*i][*j + 1] == **a)
-                {
-                    continue;
-                }
-                let mv = Move::new(a.unwrap(), Room((*i, *j)), Hall(*h));
-                if let Some(cost) = self.cost(mv) {
-                    moves.push((mv, cost));
+                let valid_move = if *i == a.unwrap().dest() {
+                    if *j == self.room_depth - 1 {
+                        false
+                    } else {
+                        self.rooms[*i][j + 1..self.room_depth]
+                            .iter()
+                            .any(|b| b.is_none() || *b != **a)
+                    }
+                } else {
+                    true
+                };
+
+                if valid_move {
+                    let mv = Move::new(a.unwrap(), Room((*i, *j)), Hall(*h));
+                    if let Some(cost) = self.cost(mv) {
+                        moves.push((mv, cost));
+                    }
                 }
             }
         }
@@ -218,14 +228,17 @@ impl Instance {
     }
 
     fn is_solution(&self) -> bool {
-        self.rooms[0][0] == Some(A)
-            && self.rooms[0][1] == Some(A)
-            && self.rooms[1][0] == Some(B)
-            && self.rooms[1][1] == Some(B)
-            && self.rooms[2][0] == Some(C)
-            && self.rooms[2][1] == Some(C)
-            && self.rooms[3][0] == Some(D)
-            && self.rooms[3][1] == Some(D)
+        for (i, r) in self.rooms.iter().enumerate() {
+            if !r.iter().all(|a| {
+                if let Some(a) = a {
+                    return a.dest() == i;
+                }
+                false
+            }) {
+                return false;
+            }
+        }
+        true
     }
 }
 
@@ -238,12 +251,16 @@ fn parse_input(lines: &Vec<String>) -> AocResult<Instance> {
         .filter(|c| *c == '.')
         .count();
     let hall = vec![None; hall_width];
-    let mut rooms = [[None; 2]; 4];
+    let mut rooms: [Vec<Option<Amph>>; 4] = [Vec::new(), Vec::new(), Vec::new(), Vec::new()];
     let mut room2hall = [0; 4];
-    for i in 0..2 {
-        let roomparts = it
-            .next()
-            .ok_or(format!("No room part {i}?"))?
+    let mut room_depth = 0;
+    for i in 0.. {
+        let line = it.next().ok_or(format!("No room part {i}?"))?;
+        if line.trim().chars().all(|c| c == '#') {
+            break;
+        }
+        room_depth += 1;
+        let roomparts = line
             .chars()
             .enumerate()
             .filter_map(|(j, c)| match c {
@@ -257,13 +274,15 @@ fn parse_input(lines: &Vec<String>) -> AocResult<Instance> {
             .collect::<Vec<_>>();
         for r in 0..4 {
             room2hall[r] = roomparts[r].0;
-            rooms[r][i] = Some(roomparts[r].1.clone());
+            rooms[r].insert(i, Some(roomparts[r].1.clone()));
         }
     }
+    assert!(rooms.iter().all(|v| v.len() == room_depth));
     Ok(Instance {
         rooms,
         room2hall,
         hall,
+        room_depth,
     })
 }
 
@@ -280,7 +299,7 @@ fn solve(
         if current_cost < *mut_min {
             *mut_min = current_cost;
         }
-        //println!("Found solution with cost {current_cost}");
+        println!("Found solution with cost {current_cost}");
         return Some(current_cost);
     }
     let moves = instance.moves();
@@ -299,21 +318,26 @@ fn solve(
         .min()
 }
 
-fn part_1(instance: &Instance) -> AocResult<i64> {
+fn part_1(lines: &Vec<String>) -> AocResult<i64> {
+    let instance = parse_input(&lines)?;
     let current_min_cost = Rc::new(RefCell::new(i64::MAX));
-    Ok(solve(instance, 0, current_min_cost).ok_or("No solution")?)
+    Ok(solve(&instance, 0, current_min_cost).ok_or("No solution")?)
 }
 
-fn part_2(instance: &Instance) -> AocResult<i64> {
-    todo!();
+fn part_2(lines: &Vec<String>) -> AocResult<i64> {
+    let mut lines = lines.clone();
+    lines.insert(3, "  #D#C#B#A#".to_string());
+    lines.insert(4, "  #D#B#A#C#".to_string());
+    let instance = parse_input(&lines)?;
+    let current_min_cost = Rc::new(RefCell::new(i64::MAX));
+    Ok(solve(&instance, 0, current_min_cost).ok_or("No solution")?)
 }
 
 fn main() -> AocResult<()> {
     let file = File::open(&get_cli_arg()?)?;
     let lines: Vec<String> = io::BufReader::new(file).lines().collect::<Result<_, _>>()?;
-    let instance = parse_input(&lines)?;
-    println!("Part 1: {}", part_1(&instance)?);
-    println!("Part 2: {}", part_2(&instance)?);
+    println!("Part 1: {}", part_1(&lines)?);
+    println!("Part 2: {}", part_2(&lines)?);
 
     Ok(())
 }
@@ -329,8 +353,7 @@ mod tests {
         let lines: Vec<String> = io::BufReader::new(testfile)
             .lines()
             .collect::<Result<_, _>>()?;
-        let instance = parse_input(&lines)?;
-        assert_eq!(part_1(&instance)?, 12521);
+        assert_eq!(part_1(&lines)?, 12521);
         Ok(())
     }
 
@@ -340,8 +363,7 @@ mod tests {
         let lines: Vec<String> = io::BufReader::new(testfile)
             .lines()
             .collect::<Result<_, _>>()?;
-        let instance = parse_input(&lines)?;
-        assert_eq!(part_1(&instance)?, 15109);
+        assert_eq!(part_1(&lines)?, 15109);
         Ok(())
     }
 
@@ -351,8 +373,7 @@ mod tests {
         let lines: Vec<String> = io::BufReader::new(testfile)
             .lines()
             .collect::<Result<_, _>>()?;
-        let instance = parse_input(&lines)?;
-        assert_eq!(part_2(&instance)?, 44169);
+        assert_eq!(part_2(&lines)?, 44169);
         Ok(())
     }
 
@@ -362,8 +383,7 @@ mod tests {
         let lines: Vec<String> = io::BufReader::new(testfile)
             .lines()
             .collect::<Result<_, _>>()?;
-        let instance = parse_input(&lines)?;
-        assert_eq!(part_2(&instance)?, 333);
+        assert_eq!(part_2(&lines)?, 53751);
         Ok(())
     }
 }
