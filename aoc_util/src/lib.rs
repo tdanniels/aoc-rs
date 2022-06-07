@@ -184,17 +184,17 @@ impl Grid {
         })
     }
 
-    pub fn from_vec(v: Vec<u8>, num_rows: usize, num_cols: usize) -> AocResult<Self> {
-        if v.len() != num_rows * num_cols {
+    pub fn from_slice(slice: &[u8], num_rows: usize, num_cols: usize) -> AocResult<Self> {
+        if slice.len() != num_rows * num_cols {
             return failure(format!(
                 "Vec len {} doesn't equal num_rows={} * num_cols={}",
-                v.len(),
+                slice.len(),
                 num_rows,
                 num_cols
             ));
         }
         Ok(Grid {
-            cells: v,
+            cells: slice.to_vec(),
             num_rows,
             num_cols,
         })
@@ -361,8 +361,8 @@ impl Grid {
         let new_len = (self.num_rows + border_size * 2) * (self.num_cols + border_size * 2);
         let mut new_cells = Vec::with_capacity(new_len);
         new_cells.resize(new_len, border_fill);
-        let mut new_grid = Grid::from_vec(
-            new_cells,
+        let mut new_grid = Grid::from_slice(
+            new_cells.as_slice(),
             self.num_rows + border_size * 2,
             self.num_cols + border_size * 2,
         )
@@ -409,12 +409,12 @@ mod grid_tests {
     #[test]
     fn grid_border() -> AocResult<()> {
         #[rustfmt::skip]
-        let mut grid = Grid::from_vec(vec![
+        let mut grid = Grid::from_slice(&[
             1, 2, 3,
             4, 5, 6], 2, 3)?;
         grid.add_border(2, 9);
         #[rustfmt::skip]
-        let mut grid2 = Grid::from_vec(vec![
+        let mut grid2 = Grid::from_slice(&[
             9, 9, 9, 9, 9, 9, 9,
             9, 9, 9, 9, 9, 9, 9,
             9, 9, 1, 2, 3, 9, 9,
@@ -425,7 +425,7 @@ mod grid_tests {
         assert_eq!(grid, grid2);
         grid2.add_border(1, 0);
         #[rustfmt::skip]
-        let grid3 = Grid::from_vec(vec![
+        let grid3 = Grid::from_slice(&[
             0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 9, 9, 9, 9, 9, 9, 9, 0,
             0, 9, 9, 9, 9, 9, 9, 9, 0,

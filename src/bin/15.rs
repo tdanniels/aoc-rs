@@ -55,7 +55,7 @@ fn part_2(grid: &Grid) -> AocResult<u64> {
         v2.extend(row.iter());
     }
 
-    let grid = Grid::from_vec(v2, grid.num_rows() * 5, grid.num_cols() * 5)?;
+    let grid = Grid::from_slice(v2.as_slice(), grid.num_rows() * 5, grid.num_cols() * 5)?;
 
     Ok(grid
         .dijkstra(
