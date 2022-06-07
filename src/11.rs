@@ -1,4 +1,4 @@
-use aoc_util::{get_cli_arg, AocResult, Grid, Point, NeighbourPattern};
+use aoc_util::{get_cli_arg, AocResult, Grid, NeighbourPattern, Point};
 use std::cmp;
 use std::collections::HashSet;
 
@@ -115,5 +115,4 @@ mod tests {
         assert_eq!(sync, 519);
         Ok(())
     }
-
 }

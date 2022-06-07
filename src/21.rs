@@ -59,7 +59,13 @@ impl GameState {
                     continue;
                 }
                 out.push((
-                    GameState::new(new_score, self.p2_score, new_pos, self.p2_pos, !self.turn),
+                    GameState::new(
+                        new_score,
+                        self.p2_score,
+                        new_pos,
+                        self.p2_pos,
+                        !self.turn,
+                    ),
                     multiplicity,
                 ));
             } else {
@@ -69,7 +75,13 @@ impl GameState {
                     continue;
                 }
                 out.push((
-                    GameState::new(self.p1_score, new_score, self.p1_pos, new_pos, !self.turn),
+                    GameState::new(
+                        self.p1_score,
+                        new_score,
+                        self.p1_pos,
+                        new_pos,
+                        !self.turn,
+                    ),
                     multiplicity,
                 ));
             }

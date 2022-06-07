@@ -804,7 +804,8 @@ impl FromStr for Cuboid {
             ("y=", &mut y0, &mut y1, true),
             ("z=", &mut z0, &mut z1, false),
         ] {
-            let start = s.find(prefix).ok_or(format!("No prefix \"{}\"?", prefix))? + prefix.len();
+            let start =
+                s.find(prefix).ok_or(format!("No prefix \"{}\"?", prefix))? + prefix.len();
             let end = if has_suffix {
                 start + s[start..].find(",").ok_or("No suffix \",\"?")?
             } else {

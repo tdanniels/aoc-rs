@@ -161,7 +161,9 @@ fn solve_part2(lines: &Vec<String>) -> AocResult<u64> {
         for (digit, len) in [(0, 6)] {
             let pattern = signal_patterns
                 .iter()
-                .find(|p| p.len() == len && sigpat2digit.iter().find(|(k, _)| k == p).is_none())
+                .find(|p| {
+                    p.len() == len && sigpat2digit.iter().find(|(k, _)| k == p).is_none()
+                })
                 .ok_or(format!("No pattern found for {}?", digit))?;
             if sigpat2digit.insert(pattern, digit).is_some() {
                 return failure(format!("Overwrote the pattern for {}", digit));

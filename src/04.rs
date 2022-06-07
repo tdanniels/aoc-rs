@@ -93,7 +93,9 @@ fn parse_chosen_numbers(numbers: &str) -> Result<Vec<i32>, <i32 as std::str::Fro
     numbers.split(',').map(|x| x.parse::<i32>()).collect()
 }
 
-fn parse_boards(lines: impl Iterator<Item = std::io::Result<String>>) -> AocResult<Vec<Board>> {
+fn parse_boards(
+    lines: impl Iterator<Item = std::io::Result<String>>,
+) -> AocResult<Vec<Board>> {
     let mut row = 0;
     let mut board = Board::new();
     let mut boards: Vec<Board> = Vec::new();
@@ -137,7 +139,8 @@ fn part1(filename: &str) -> AocResult<i64> {
     let file = File::open(filename)?;
     let mut lines = io::BufReader::new(&file).lines();
 
-    let chosen_numbers = parse_chosen_numbers(&lines.next().ok_or("Can't parse chosen numbers")??)?;
+    let chosen_numbers =
+        parse_chosen_numbers(&lines.next().ok_or("Can't parse chosen numbers")??)?;
     let mut boards = parse_boards(&mut lines)?;
 
     for x in chosen_numbers {
@@ -158,7 +161,8 @@ fn part2(filename: &str) -> AocResult<i64> {
     let file = File::open(filename)?;
     let mut lines = io::BufReader::new(&file).lines();
 
-    let chosen_numbers = parse_chosen_numbers(&lines.next().ok_or("Can't parse chosen numbers")??)?;
+    let chosen_numbers =
+        parse_chosen_numbers(&lines.next().ok_or("Can't parse chosen numbers")??)?;
     let mut boards = parse_boards(&mut lines)?;
     let mut scores: Vec<i64> = Vec::new();
     let mut boards_that_have_won: Vec<bool> = vec![false; boards.len()];

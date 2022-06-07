@@ -167,7 +167,11 @@ fn parse_packet(bv: &BitVec, idx: usize) -> AocResult<(Packet, usize)> {
     Ok((packet, parse_idx + bits_consumed - idx))
 }
 
-fn parse_operator_packet(bv: &BitVec, idx: usize, header: &Header) -> AocResult<(Packet, usize)> {
+fn parse_operator_packet(
+    bv: &BitVec,
+    idx: usize,
+    header: &Header,
+) -> AocResult<(Packet, usize)> {
     let mut parse_idx = idx;
     let mut payload = Vec::new();
 
@@ -212,7 +216,11 @@ fn parse_operator_packet(bv: &BitVec, idx: usize, header: &Header) -> AocResult<
     ))
 }
 
-fn parse_literal_packet(bv: &BitVec, idx: usize, header: &Header) -> AocResult<(Packet, usize)> {
+fn parse_literal_packet(
+    bv: &BitVec,
+    idx: usize,
+    header: &Header,
+) -> AocResult<(Packet, usize)> {
     let mut parse_idx = idx;
     let mut value: u64 = 0;
     let mut nibble_count = 0;

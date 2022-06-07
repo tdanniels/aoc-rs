@@ -152,7 +152,8 @@ const ORIENTATIONS: [Orientation; 6] = [
     Orientation::MinusZ,
 ];
 
-const ROTATIONS: [Rotation; 4] = [Rotation::_0, Rotation::_90, Rotation::_180, Rotation::_270];
+const ROTATIONS: [Rotation; 4] =
+    [Rotation::_0, Rotation::_90, Rotation::_180, Rotation::_270];
 
 #[derive(Clone, Copy, Debug)]
 struct CoordinateSystem {
@@ -287,7 +288,9 @@ impl Scanner {
                         *entry += 1;
                     }
                 }
-                if let Some((true_ofs, _)) = offsets2counts.iter().find(|(_, v)| **v >= N_ALIGN) {
+                if let Some((true_ofs, _)) =
+                    offsets2counts.iter().find(|(_, v)| **v >= N_ALIGN)
+                {
                     ofs = Some(true_ofs.clone());
                     ori = Some(orientation);
                     rot = Some(rotation);

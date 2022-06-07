@@ -15,8 +15,8 @@ fn parse_input(filename: &str) -> AocResult<(i64, i64, i64, i64)> {
         return failure("Input line isn't ascii?");
     }
 
-    let xslice = &line
-        [line.find("x=").ok_or("No x=?")? + "x=".len()..line.find(",").ok_or("No first , ?")?];
+    let xslice = &line[line.find("x=").ok_or("No x=?")? + "x=".len()
+        ..line.find(",").ok_or("No first , ?")?];
     let xmin_xmax: Vec<i64> = xslice
         .split("..")
         .map(|s| s.parse::<i64>())
@@ -41,7 +41,11 @@ fn parse_input(filename: &str) -> AocResult<(i64, i64, i64, i64)> {
     Ok((xmin_xmax[0], xmin_xmax[1], ymin_ymax[0], ymin_ymax[1]))
 }
 
-fn bound_parameter_space(min_x: i64, max_x: i64, min_y: i64) -> AocResult<(i64, i64, i64, i64)> {
+fn bound_parameter_space(
+    min_x: i64,
+    max_x: i64,
+    min_y: i64,
+) -> AocResult<(i64, i64, i64, i64)> {
     let min_vx = (min_x as f64).sqrt().floor() as i64;
     let max_vx = max_x + 1;
     let min_vy = min_y - 1;

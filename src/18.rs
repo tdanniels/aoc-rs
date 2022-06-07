@@ -26,7 +26,8 @@ fn reduce(node: &NodeWrapper) -> AocResult<()> {
 
 fn try_explode(node: &NodeWrapper) -> AocResult<bool> {
     let nodes_dfs_order = node.depth_first_iter().collect::<Vec<_>>();
-    if let Some((exploding_node, _)) = nodes_dfs_order.iter().find(|(_, depth)| *depth == 5) {
+    if let Some((exploding_node, _)) = nodes_dfs_order.iter().find(|(_, depth)| *depth == 5)
+    {
         assert!(exploding_node.is_leaf() && exploding_node.has_data());
         let exploding_node = exploding_node.get_parent().unwrap();
         assert!(!exploding_node.is_leaf() && !exploding_node.has_data());
@@ -159,17 +160,11 @@ fn part_2(problem: Vec<NodeWrapper>) -> AocResult<i64> {
             // Super inefficient, but good enough for now.
             let num_a_clone = NodeWrapper::from_ascii(num_a.to_string().as_bytes())?;
             let num_b_clone = NodeWrapper::from_ascii(num_b.to_string().as_bytes())?;
-            max = cmp::max(
-                max,
-                magnitude(&add(&num_a_clone, &num_b_clone)?),
-            );
+            max = cmp::max(max, magnitude(&add(&num_a_clone, &num_b_clone)?));
 
             let num_a_clone = NodeWrapper::from_ascii(num_a.to_string().as_bytes())?;
             let num_b_clone = NodeWrapper::from_ascii(num_b.to_string().as_bytes())?;
-            max = cmp::max(
-                max,
-                magnitude(&add(&num_b_clone, &num_a_clone)?),
-            );
+            max = cmp::max(max, magnitude(&add(&num_b_clone, &num_a_clone)?));
         }
     }
     Ok(max)
