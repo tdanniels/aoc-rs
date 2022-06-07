@@ -98,6 +98,7 @@ pub struct Grid {
     cells: Vec<u8>,
     num_rows: usize,
     num_cols: usize,
+    is_toroidal: bool,
 }
 
 impl fmt::Display for Grid {
@@ -130,7 +131,7 @@ pub enum NeighbourPattern {
 ///  .    .    .
 ///  .    .    .
 impl Grid {
-    // TODO: update to use a an iterable of String instead of `filename`.
+    // TODO: update to use a an iterable of AsRef<str> instead of `filename`.
     pub fn from_digit_matrix_file(filename: &str) -> AocResult<Self> {
         let file = File::open(filename)?;
         let lines: Vec<String> = io::BufReader::new(file)
@@ -158,9 +159,11 @@ impl Grid {
             cells,
             num_rows,
             num_cols,
+            is_toroidal: false,
         })
     }
 
+    // TODO: update to use a an iterable of AsRef<str> instead of &[String].
     pub fn from_symbol_matrix<F>(lines: &[String], map_func: F) -> AocResult<Self>
     where
         F: Fn(char) -> Option<u8>,
@@ -181,6 +184,7 @@ impl Grid {
             cells,
             num_rows,
             num_cols,
+            is_toroidal: false,
         })
     }
 
@@ -197,7 +201,20 @@ impl Grid {
             cells: slice.to_vec(),
             num_rows,
             num_cols,
+            is_toroidal: false,
         })
+    }
+
+    /// Treats points outside the grid as if they loop around instead
+    /// of being invalid. Note that it's currently only possible to loop around
+    /// from the bottom of the grid to the top, and from the right to the left,
+    /// since grid coordinates are unsigned.
+    pub fn make_toroidal(&mut self, is_toroidal: bool) {
+        self.is_toroidal = is_toroidal;
+    }
+
+    pub fn is_toroidal(&self) -> bool {
+        self.is_toroidal
     }
 
     pub fn vec(&self) -> &Vec<u8> {
@@ -213,44 +230,56 @@ impl Grid {
     }
 
     pub fn at(&self, p: Point) -> AocResult<u8> {
-        if p.i >= self.num_rows || p.j >= self.num_cols {
+        if !self.is_toroidal && (p.i >= self.num_rows || p.j >= self.num_cols) {
             return failure(format!("Invalid coordinates {}", p));
         }
-        Ok(self.cells[p.i * self.num_cols + p.j])
+        Ok(self.cells[(p.i % self.num_rows) * self.num_cols + (p.j % self.num_cols)])
     }
 
     pub fn set(&mut self, point: Point, value: u8) -> AocResult<()> {
-        if point.i >= self.num_rows || point.j >= self.num_cols {
+        if !self.is_toroidal && (point.i >= self.num_rows || point.j >= self.num_cols) {
             return failure(format!("Invalid coordinates {}", point));
         }
-        self.cells[point.i * self.num_cols + point.j] = value;
+        self.cells[(point.i % self.num_rows) * self.num_cols + (point.j % self.num_cols)] =
+            value;
         Ok(())
     }
 
-    /// Returns: Err(...) if `point` is an invalid coordinate (i.e., outside the grid).
+    /// Returns: Err(...) if `point` is an invalid coordinate (i.e., outside the grid) and
+    ///          the grid is not toroidal.
     ///          Returns Ok(...) otherwise.
     /// The returned `Vec`'s elements and ordering are chosen according to NeighbourPattern.
-    /// The elements will be `None` if they are off the grid, otherwise they will be of
-    /// the form (point coordinate pair, value).
+    /// The elements will be `None` if they are off the grid (and the grid is not toroidal),
+    /// otherwise they will be of the form (point coordinate pair, value).
     pub fn neighbourhood(
         &self,
         point: Point,
         neighbour_pattern: NeighbourPattern,
     ) -> AocResult<Vec<Option<(Point, u8)>>> {
-        if point.i >= self.num_rows || point.j >= self.num_cols {
+        if !self.is_toroidal && (point.i >= self.num_rows || point.j >= self.num_cols) {
             return failure(format!("Invalid coordinates {}", point));
         }
         let mut out: Vec<Option<(Point, u8)>> = Vec::new();
 
-        let n_ok = point.i > 0;
-        let w_ok = point.j > 0;
-        let e_ok = point.j < self.num_cols - 1;
-        let s_ok = point.i < self.num_rows - 1;
+        let point = Point::new(point.i % self.num_rows, point.j % self.num_cols);
 
-        let n_coord = point.i.overflowing_sub(1).0;
-        let w_coord = point.j.overflowing_sub(1).0;
-        let e_coord = point.j + 1;
-        let s_coord = point.i + 1;
+        let n_ok = self.is_toroidal || (point.i > 0);
+        let w_ok = self.is_toroidal || (point.j > 0);
+        let e_ok = self.is_toroidal || (point.j < self.num_cols - 1);
+        let s_ok = self.is_toroidal || (point.i < self.num_rows - 1);
+
+        let n_coord = if let Some(v) = point.i.checked_sub(1) {
+            v
+        } else {
+            self.num_rows - 1
+        };
+        let w_coord = if let Some(v) = point.j.checked_sub(1) {
+            v
+        } else {
+            self.num_cols - 1
+        };
+        let e_coord = (point.j + 1) % self.num_cols;
+        let s_coord = (point.i + 1) % self.num_rows;
 
         let conditions: Vec<(bool, Point)> = match neighbour_pattern {
             NeighbourPattern::Compass4 => vec![
@@ -289,10 +318,10 @@ impl Grid {
     }
 
     fn index_from_point(&self, point: Point) -> AocResult<usize> {
-        if point.i >= self.num_rows || point.j >= self.num_cols {
+        if !self.is_toroidal && (point.i >= self.num_rows || point.j >= self.num_cols) {
             return failure(format!("Invalid coordinates {}", point));
         }
-        Ok(self.num_cols * point.i + point.j)
+        Ok(self.num_cols * (point.i % self.num_rows) + (point.j % self.num_cols))
     }
 
     pub fn dijkstra(
@@ -367,6 +396,7 @@ impl Grid {
             self.num_cols + border_size * 2,
         )
         .unwrap();
+        new_grid.is_toroidal = self.is_toroidal;
         for i in 0..self.num_rows() {
             for j in 0..self.num_cols() {
                 let p_old = Point::new(i, j);
@@ -436,6 +466,108 @@ mod grid_tests {
             0, 0, 0, 0, 0, 0, 0, 0, 0,
         ], 8, 9)?;
         assert_eq!(grid2, grid3);
+        Ok(())
+    }
+
+    #[test]
+    fn at() -> AocResult<()> {
+        #[rustfmt::skip]
+        let mut grid = Grid::from_slice(&[
+            1, 2, 3,
+            4, 5, 6], 2, 3)?;
+
+        assert_eq!(grid.at(Point::new(0, 0))?, 1);
+        assert_eq!(grid.at(Point::new(0, 1))?, 2);
+        assert_eq!(grid.at(Point::new(0, 2))?, 3);
+        assert_eq!(grid.at(Point::new(1, 0))?, 4);
+        assert_eq!(grid.at(Point::new(1, 1))?, 5);
+        assert_eq!(grid.at(Point::new(1, 2))?, 6);
+
+        grid.make_toroidal(true);
+
+        assert_eq!(grid.at(Point::new(0, 0))?, 1);
+        assert_eq!(grid.at(Point::new(0, 1))?, 2);
+        assert_eq!(grid.at(Point::new(0, 2))?, 3);
+        assert_eq!(grid.at(Point::new(1, 0))?, 4);
+        assert_eq!(grid.at(Point::new(1, 1))?, 5);
+        assert_eq!(grid.at(Point::new(1, 2))?, 6);
+
+        assert_eq!(grid.at(Point::new(2, 0))?, 1);
+        assert_eq!(grid.at(Point::new(2, 1))?, 2);
+        assert_eq!(grid.at(Point::new(2, 2))?, 3);
+        assert_eq!(grid.at(Point::new(3, 0))?, 4);
+        assert_eq!(grid.at(Point::new(3, 1))?, 5);
+        assert_eq!(grid.at(Point::new(3, 2))?, 6);
+
+        assert_eq!(grid.at(Point::new(0, 3))?, 1);
+        assert_eq!(grid.at(Point::new(0, 4))?, 2);
+        assert_eq!(grid.at(Point::new(0, 5))?, 3);
+        assert_eq!(grid.at(Point::new(1, 3))?, 4);
+        assert_eq!(grid.at(Point::new(1, 4))?, 5);
+        assert_eq!(grid.at(Point::new(1, 5))?, 6);
+
+        assert_eq!(grid.at(Point::new(2, 3))?, 1);
+        assert_eq!(grid.at(Point::new(2, 4))?, 2);
+        assert_eq!(grid.at(Point::new(2, 5))?, 3);
+        assert_eq!(grid.at(Point::new(3, 3))?, 4);
+        assert_eq!(grid.at(Point::new(3, 4))?, 5);
+        assert_eq!(grid.at(Point::new(3, 5))?, 6);
+
+        Ok(())
+    }
+
+    #[test]
+    fn neighbours() -> AocResult<()> {
+        #[rustfmt::skip]
+        let mut grid = Grid::from_slice(&[
+            1, 2, 3,
+            4, 5, 6], 2, 3)?;
+        assert_eq!(
+            grid.neighbourhood(Point::new(0, 0), NeighbourPattern::Compass4)?,
+            vec![
+                None,
+                None,
+                Some((Point::new(0, 1), 2)),
+                Some((Point::new(1, 0), 4))
+            ]
+        );
+        assert_eq!(
+            grid.neighbourhood(Point::new(0, 0), NeighbourPattern::Compass8)?,
+            vec![
+                None,
+                None,
+                None,
+                None,
+                Some((Point::new(0, 1), 2)),
+                None,
+                Some((Point::new(1, 0), 4)),
+                Some((Point::new(1, 1), 5))
+            ]
+        );
+
+        grid.make_toroidal(true);
+        assert_eq!(
+            grid.neighbourhood(Point::new(0, 0), NeighbourPattern::Compass4)?,
+            vec![
+                Some((Point::new(1, 0), 4)),
+                Some((Point::new(0, 2), 3)),
+                Some((Point::new(0, 1), 2)),
+                Some((Point::new(1, 0), 4))
+            ]
+        );
+        assert_eq!(
+            grid.neighbourhood(Point::new(0, 0), NeighbourPattern::Compass8)?,
+            vec![
+                Some((Point::new(1, 2), 6)),
+                Some((Point::new(1, 0), 4)),
+                Some((Point::new(1, 1), 5)),
+                Some((Point::new(0, 2), 3)),
+                Some((Point::new(0, 1), 2)),
+                Some((Point::new(1, 2), 6)),
+                Some((Point::new(1, 0), 4)),
+                Some((Point::new(1, 1), 5))
+            ]
+        );
         Ok(())
     }
 }
