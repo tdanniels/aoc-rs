@@ -40,3 +40,33 @@ fn main() -> AocResult<()> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use aoc_util::{get_input_file, get_test_file};
+
+    #[test]
+    fn part_1_test() -> AocResult<()> {
+        assert_eq!(solve(&get_test_file(file!())?, 80)?, 5934);
+        Ok(())
+    }
+
+    #[test]
+    fn part_1_input() -> AocResult<()> {
+        assert_eq!(solve(&get_input_file(file!())?, 80)?, 355386);
+        Ok(())
+    }
+
+    #[test]
+    fn part_2_test() -> AocResult<()> {
+        assert_eq!(solve(&get_test_file(file!())?, 256)?, 26984457539);
+        Ok(())
+    }
+
+    #[test]
+    fn part_2_input() -> AocResult<()> {
+        assert_eq!(solve(&get_input_file(file!())?, 256)?, 1613415325809);
+        Ok(())
+    }
+}

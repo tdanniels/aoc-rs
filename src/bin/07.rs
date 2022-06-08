@@ -37,3 +37,33 @@ fn main() -> AocResult<()> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use aoc_util::{get_input_file, get_test_file};
+
+    #[test]
+    fn part_1_test() -> AocResult<()> {
+        assert_eq!(solve(&get_test_file(file!())?, Cost::Linear)?, 37);
+        Ok(())
+    }
+
+    #[test]
+    fn part_1_input() -> AocResult<()> {
+        assert_eq!(solve(&get_input_file(file!())?, Cost::Linear)?, 364898);
+        Ok(())
+    }
+
+    #[test]
+    fn part_2_test() -> AocResult<()> {
+        assert_eq!(solve(&get_test_file(file!())?, Cost::Quadratic)?, 168);
+        Ok(())
+    }
+
+    #[test]
+    fn part_2_input() -> AocResult<()> {
+        assert_eq!(solve(&get_input_file(file!())?, Cost::Quadratic)?, 104149091);
+        Ok(())
+    }
+}

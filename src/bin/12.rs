@@ -65,3 +65,37 @@ fn main() -> AocResult<()> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use aoc_util::{get_input_file, get_test_file};
+
+    #[test]
+    fn part_1_test() -> AocResult<()> {
+        let graph = UnweightedUndirectedGraph::from_file(&get_test_file(file!())?)?;
+        assert_eq!(part_1(&graph)?, 226);
+        Ok(())
+    }
+
+    #[test]
+    fn part_1_input() -> AocResult<()> {
+        let graph = UnweightedUndirectedGraph::from_file(&get_input_file(file!())?)?;
+        assert_eq!(part_1(&graph)?, 3679);
+        Ok(())
+    }
+
+    #[test]
+    fn part_2_test() -> AocResult<()> {
+        let graph = UnweightedUndirectedGraph::from_file(&get_test_file(file!())?)?;
+        assert_eq!(part_2(&graph)?, 3509);
+        Ok(())
+    }
+
+    #[test]
+    fn part_2_input() -> AocResult<()> {
+        let graph = UnweightedUndirectedGraph::from_file(&get_input_file(file!())?)?;
+        assert_eq!(part_2(&graph)?, 107395);
+        Ok(())
+    }
+}

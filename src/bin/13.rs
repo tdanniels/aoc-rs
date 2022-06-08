@@ -114,3 +114,56 @@ fn main() -> AocResult<()> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use aoc_util::{get_input_file, get_test_file};
+
+    #[test]
+    fn part_1_test() -> AocResult<()> {
+        let (paper, folds) = parse_input(&get_test_file(file!())?)?;
+        assert_eq!(part_1(&paper, &folds)?, 17);
+        Ok(())
+    }
+
+    #[test]
+    fn part_1_input() -> AocResult<()> {
+        let (paper, folds) = parse_input(&get_input_file(file!())?)?;
+        assert_eq!(part_1(&paper, &folds)?, 753);
+        Ok(())
+    }
+
+    #[test]
+    fn part_2_test() -> AocResult<()> {
+        let (paper, folds) = parse_input(&get_test_file(file!())?)?;
+        assert_eq!(
+            part_2(&paper, &folds)?,
+            "\
+#####
+#...#
+#...#
+#...#
+#####
+"
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn part_2_input() -> AocResult<()> {
+        let (paper, folds) = parse_input(&get_input_file(file!())?)?;
+        assert_eq!(
+            part_2(&paper, &folds)?,
+            "\
+#..#.####.#....####.#..#...##.###..#..#
+#..#....#.#....#....#..#....#.#..#.#.#.
+####...#..#....###..####....#.#..#.##..
+#..#..#...#....#....#..#....#.###..#.#.
+#..#.#....#....#....#..#.#..#.#.#..#.#.
+#..#.####.####.####.#..#..##..#..#.#..#
+"
+        );
+        Ok(())
+    }
+}

@@ -106,3 +106,33 @@ fn part2(filename: &str) -> i64 {
     let co2i = i64::from_str_radix(&co2, 2).unwrap();
     o2i * co2i
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use aoc_util::{get_input_file, get_test_file};
+
+    #[test]
+    fn part_1_test() -> AocResult<()> {
+        assert_eq!(part1(&get_test_file(file!())?), 198);
+        Ok(())
+    }
+
+    #[test]
+    fn part_1_input() -> AocResult<()> {
+        assert_eq!(part1(&get_input_file(file!())?), 2003336);
+        Ok(())
+    }
+
+    #[test]
+    fn part_2_test() -> AocResult<()> {
+        assert_eq!(part2(&get_test_file(file!())?), 230);
+        Ok(())
+    }
+
+    #[test]
+    fn part_2_input() -> AocResult<()> {
+        assert_eq!(part2(&get_input_file(file!())?), 1877139);
+        Ok(())
+    }
+}

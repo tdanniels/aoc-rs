@@ -116,3 +116,33 @@ fn solve(filename: &str, consider_diags: bool) -> AocResult<i64> {
 
     Ok(counts_ge_2)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use aoc_util::{get_input_file, get_test_file};
+
+    #[test]
+    fn part_1_test() -> AocResult<()> {
+        assert_eq!(part1(&get_test_file(file!())?)?, 5);
+        Ok(())
+    }
+
+    #[test]
+    fn part_1_input() -> AocResult<()> {
+        assert_eq!(part1(&get_input_file(file!())?)?, 4873);
+        Ok(())
+    }
+
+    #[test]
+    fn part_2_test() -> AocResult<()> {
+        assert_eq!(part2(&get_test_file(file!())?)?, 12);
+        Ok(())
+    }
+
+    #[test]
+    fn part_2_input() -> AocResult<()> {
+        assert_eq!(part2(&get_input_file(file!())?)?, 19472);
+        Ok(())
+    }
+}

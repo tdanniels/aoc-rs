@@ -187,3 +187,33 @@ fn part2(filename: &str) -> AocResult<i64> {
     }
     failure("No wins!")
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use aoc_util::{get_input_file, get_test_file};
+
+    #[test]
+    fn part_1_test() -> AocResult<()> {
+        assert_eq!(part1(&get_test_file(file!())?)?, 4512);
+        Ok(())
+    }
+
+    #[test]
+    fn part_1_input() -> AocResult<()> {
+        assert_eq!(part1(&get_input_file(file!())?)?, 28082);
+        Ok(())
+    }
+
+    #[test]
+    fn part_2_test() -> AocResult<()> {
+        assert_eq!(part2(&get_test_file(file!())?)?, 1924);
+        Ok(())
+    }
+
+    #[test]
+    fn part_2_input() -> AocResult<()> {
+        assert_eq!(part2(&get_input_file(file!())?)?, 8224);
+        Ok(())
+    }
+}

@@ -3,7 +3,18 @@ use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::{self, BufRead};
 
-fn solve_part1(lines: &Vec<String>, segct2digs: &[Vec<u8>; 8]) -> AocResult<u64> {
+fn solve_part1(lines: &Vec<String>) -> AocResult<u64> {
+    let segct2digs = [
+        vec![],
+        vec![],
+        vec![1],
+        vec![7],
+        vec![4],
+        vec![2, 3, 5],
+        vec![0, 6, 9],
+        vec![8],
+    ];
+
     let res = lines
         .iter()
         .map(|l| {
@@ -201,24 +212,59 @@ fn prep_line(line: &str) -> AocResult<(Vec<String>, Vec<String>)> {
 }
 
 fn main() -> AocResult<()> {
-    let segct2digs: [Vec<u8>; 8] = [
-        vec![],
-        vec![],
-        vec![1],
-        vec![7],
-        vec![4],
-        vec![2, 3, 5],
-        vec![0, 6, 9],
-        vec![8],
-    ];
-
     let file = File::open(&get_cli_arg()?)?;
     let lines: Vec<String> = io::BufReader::new(file)
         .lines()
         .collect::<io::Result<_>>()?;
 
-    println!("Part 1: {}", solve_part1(&lines, &segct2digs)?);
+    println!("Part 1: {}", solve_part1(&lines)?);
     println!("Part 2: {}", solve_part2(&lines)?);
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use aoc_util::{get_input_file, get_test_file};
+
+    #[test]
+    fn part_1_test() -> AocResult<()> {
+        let testfile = File::open(get_test_file(file!())?)?;
+        let lines: Vec<String> = io::BufReader::new(testfile)
+            .lines()
+            .collect::<io::Result<_>>()?;
+        assert_eq!(solve_part1(&lines)?, 26);
+        Ok(())
+    }
+
+    #[test]
+    fn part_1_input() -> AocResult<()> {
+        let testfile = File::open(get_input_file(file!())?)?;
+        let lines: Vec<String> = io::BufReader::new(testfile)
+            .lines()
+            .collect::<io::Result<_>>()?;
+        assert_eq!(solve_part1(&lines)?, 310);
+        Ok(())
+    }
+
+    #[test]
+    fn part_2_test() -> AocResult<()> {
+        let testfile = File::open(get_test_file(file!())?)?;
+        let lines: Vec<String> = io::BufReader::new(testfile)
+            .lines()
+            .collect::<io::Result<_>>()?;
+        assert_eq!(solve_part2(&lines)?, 61229);
+        Ok(())
+    }
+
+    #[test]
+    fn part_2_input() -> AocResult<()> {
+        let testfile = File::open(get_input_file(file!())?)?;
+        let lines: Vec<String> = io::BufReader::new(testfile)
+            .lines()
+            .collect::<io::Result<_>>()?;
+        assert_eq!(solve_part2(&lines)?, 915941);
+        Ok(())
+    }
 }

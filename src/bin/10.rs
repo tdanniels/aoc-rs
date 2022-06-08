@@ -115,3 +115,49 @@ fn main() -> AocResult<()> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use aoc_util::{get_input_file, get_test_file};
+
+    #[test]
+    fn part_1_test() -> AocResult<()> {
+        let testfile = File::open(get_test_file(file!())?)?;
+        let lines: Vec<String> = io::BufReader::new(testfile)
+            .lines()
+            .collect::<io::Result<_>>()?;
+        assert_eq!(part_1(&lines)?, 26397);
+        Ok(())
+    }
+
+    #[test]
+    fn part_1_input() -> AocResult<()> {
+        let testfile = File::open(get_input_file(file!())?)?;
+        let lines: Vec<String> = io::BufReader::new(testfile)
+            .lines()
+            .collect::<io::Result<_>>()?;
+        assert_eq!(part_1(&lines)?, 345441);
+        Ok(())
+    }
+
+    #[test]
+    fn part_2_test() -> AocResult<()> {
+        let testfile = File::open(get_test_file(file!())?)?;
+        let lines: Vec<String> = io::BufReader::new(testfile)
+            .lines()
+            .collect::<io::Result<_>>()?;
+        assert_eq!(part_2(&lines)?, 288957);
+        Ok(())
+    }
+
+    #[test]
+    fn part_2_input() -> AocResult<()> {
+        let testfile = File::open(get_input_file(file!())?)?;
+        let lines: Vec<String> = io::BufReader::new(testfile)
+            .lines()
+            .collect::<io::Result<_>>()?;
+        assert_eq!(part_2(&lines)?, 3235371166);
+        Ok(())
+    }
+}
