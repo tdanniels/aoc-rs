@@ -997,7 +997,7 @@ impl Cuboid {
             vec![self.clone()]
         } else if other.contains(&self) {
             vec![other.clone()]
-        } else if let Some(_intersection) = self.intersection(other) {
+        } else if self.intersects(other) {
             let mut out = vec![self.clone()];
             out.append(&mut other.difference(self));
             out
@@ -1078,11 +1078,11 @@ impl Cuboid {
                 out.push(Cuboid::new(co.0, co.1, co.2, co.3, co.4, co.5).unwrap());
             }
         }
-        debug_assert!(out.iter().all(|c| c.intersection(&self).is_none()));
+        debug_assert!(out.iter().all(|c| !c.intersects(&self)));
         debug_assert!(out.iter().enumerate().all(|(i, c1)| out
             .iter()
             .enumerate()
-            .all(|(j, c2)| i == j || c1.intersection(c2).is_none())));
+            .all(|(j, c2)| i == j || !c1.intersects(c2))));
         out
     }
 
@@ -1090,7 +1090,7 @@ impl Cuboid {
         if other.contains(self) {
             vec![]
         } else if let Some(intersection) = self.intersection(other) {
-            let mut out = Vec::new();
+            let mut out = Vec::with_capacity(26);
             // Extend `intersection` in all 26 possible directions, and take the
             // intersection of `ext` and `self` to obtain a possible partial difference
             // cuboid. If the new intersection is empty, skip it, otherwise add it to `out`.
@@ -1144,6 +1144,37 @@ impl Cuboid {
         };
 
         Some(Cuboid::new(x_seg.0, x_seg.1, y_seg.0, y_seg.1, z_seg.0, z_seg.1).unwrap())
+    }
+
+    pub fn intersects(&self, other: &Cuboid) -> bool {
+        let (left, right) = if self.x0 <= other.x0 {
+            (self, other)
+        } else {
+            (other, self)
+        };
+        if left.x1 < right.x0 {
+            return false;
+        }
+
+        let (left, right) = if self.y0 <= other.y0 {
+            (self, other)
+        } else {
+            (other, self)
+        };
+        if left.y1 < right.y0 {
+            return false;
+        }
+
+        let (left, right) = if self.z0 <= other.z0 {
+            (self, other)
+        } else {
+            (other, self)
+        };
+        if left.z1 < right.z0 {
+            return false;
+        }
+
+        true
     }
 
     pub fn split(&self) -> AocResult<[Cuboid; 8]> {
@@ -1400,7 +1431,7 @@ impl PolyCuboid {
                         overlap = true;
                         break;
                     }
-                    if other.intersection(c).is_some() {
+                    if other.intersects(c) {
                         let mut diff = other.difference(c);
                         others.swap_remove(j);
                         others.append(&mut diff);
