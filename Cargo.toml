@@ -5,3 +5,6 @@ edition = "2021"
 
 [dependencies]
 aoc-util = { path = "aoc_util" }
+
+[profile.release]
+lto = true
