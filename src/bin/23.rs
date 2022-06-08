@@ -1,10 +1,11 @@
 use aoc_util::{get_cli_arg, AocResult};
 use std::cell::RefCell;
+use std::cmp::min;
+use std::collections::{BTreeSet, HashMap};
 use std::fs::File;
 use std::io::{self, BufRead};
-use std::rc::Rc;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialOrd, PartialEq, Ord)]
 enum Amph {
     A,
     B,
@@ -32,18 +33,18 @@ impl Amph {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Eq, PartialOrd, PartialEq, Ord)]
 enum Location {
     /// (room_idx \in 0..4, room_part_idx \in 0..room_depth)
     Room((usize, usize)),
-    // hall_idx \in 0..11
+    /// hall_idx \in 0..11
     Hall(usize),
 }
 
 use Amph::*;
 use Location::*;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Eq, PartialOrd, PartialEq, Ord)]
 struct Move {
     amph: Amph,
     from: Location,
@@ -56,9 +57,9 @@ impl Move {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, Hash, PartialOrd, PartialEq, Ord)]
 struct Instance {
-    /// rooms[i][j] is room i, room_part j. room_part[0] is closest to the hall.
+    /// `rooms[i][j]` is room `i`, room part `j`. Room part `0` is closest to the hall.
     rooms: [Vec<Option<Amph>>; 4],
     /// Maps from room index i to the hall part that connects to it.
     room2hall: [usize; 4],
@@ -67,20 +68,18 @@ struct Instance {
 }
 
 impl Instance {
-    /// Returns the path travelled along mv.from -> mv.to. Does not include the starting
-    /// location, mv.from. Ignores collision with Amphs.
+    /// Returns the path travelled along `mv.from -> mv.to`. Does not include the starting
+    /// location, `mv.from`. Ignores collision with `Amph`s.
     fn path(&self, mv: Move) -> Vec<Location> {
         let mut path = Vec::with_capacity(14);
         match (mv.from, mv.to) {
             (Room(from), Room(to)) => {
-                assert_ne!(from.0, to.0);
                 for i in (0..from.1).rev() {
                     path.push(Room((from.0, i)));
                 }
 
                 let hall_start = self.room2hall[from.0];
                 let hall_end = self.room2hall[to.0];
-                assert_ne!(hall_start, hall_end);
                 let hall_vec: Vec<Location> = if hall_start < hall_end {
                     (hall_start..=hall_end).map(|x| Hall(x)).collect()
                 } else {
@@ -99,7 +98,6 @@ impl Instance {
 
                 let hall_start = self.room2hall[from.0];
                 let hall_end = to;
-                assert_ne!(hall_start, hall_end);
                 let hall_vec: Vec<Location> = if hall_start < hall_end {
                     (hall_start..=hall_end).map(|x| Hall(x)).collect()
                 } else {
@@ -110,7 +108,6 @@ impl Instance {
             (Hall(from), Room(to)) => {
                 let hall_start = from;
                 let hall_end = self.room2hall[to.0];
-                assert_ne!(hall_start, hall_end);
                 let hall_vec: Vec<Location> = if hall_start < hall_end {
                     (hall_start + 1..=hall_end).map(|x| Hall(x)).collect()
                 } else {
@@ -158,9 +155,11 @@ impl Instance {
         out
     }
 
-    /// (move, cost)
-    fn moves(&self) -> Vec<(Move, i64)> {
-        let mut moves = Vec::new();
+    /// (cost, move)
+    fn moves(&self) -> Vec<(i64, Move)> {
+        // Store (dist_from_dest, cost, move). The first part of the tuple
+        // is for heuristic purposes.
+        let mut moves = BTreeSet::new();
         let (hall_occupied, hall_unoccupied): (Vec<_>, Vec<_>) = self
             .hall
             .iter()
@@ -174,21 +173,15 @@ impl Instance {
             .enumerate()
             .map(|(i, a)| (i / self.room_depth, i % self.room_depth, a))
             .partition(|(_, _, a)| a.is_some());
-        assert_eq!(
-            room_parts_occupied.len() + hall_occupied.len(),
-            self.room_depth * 4
-        );
-        assert_eq!(room_parts_unoccupied.len() + hall_unoccupied.len(), 11 - 4);
 
         for (h, a) in &hall_occupied {
             for (i, j, _) in &room_parts_unoccupied {
                 if a.unwrap().dest() == *i {
                     let mut valid_move = true;
-                    for k in j + 1..self.room_depth {
+                    for b in self.rooms[*i][j + 1..self.room_depth].iter() {
                         // Always move as deep into the room as possible.
                         // Ensure room is occupied only by other Amphs of the same variant.
-                        let b = self.rooms[*i][k];
-                        if b.is_none() || (b.is_some() && b != **a) {
+                        if b.is_none() || (b.is_some() && b != *a) {
                             valid_move = false;
                             break;
                         }
@@ -196,7 +189,7 @@ impl Instance {
                     if valid_move {
                         let mv = Move::new(a.unwrap(), Hall(*h), Room((*i, *j)));
                         if let Some(cost) = self.cost(mv) {
-                            moves.push((mv, cost));
+                            moves.insert((0, cost, mv));
                         }
                     }
                 }
@@ -219,12 +212,16 @@ impl Instance {
                 if valid_move {
                     let mv = Move::new(a.unwrap(), Room((*i, *j)), Hall(*h));
                     if let Some(cost) = self.cost(mv) {
-                        moves.push((mv, cost));
+                        moves.insert((
+                            (*h as isize - self.room2hall[*i] as isize).abs(),
+                            cost,
+                            mv,
+                        ));
                     }
                 }
             }
         }
-        moves
+        moves.into_iter().map(|(_, c, m)| (c, m)).collect()
     }
 
     fn is_solution(&self) -> bool {
@@ -277,7 +274,6 @@ fn parse_input(lines: &Vec<String>) -> AocResult<Instance> {
             rooms[r].insert(i, Some(roomparts[r].1.clone()));
         }
     }
-    assert!(rooms.iter().all(|v| v.len() == room_depth));
     Ok(Instance {
         rooms,
         room2hall,
@@ -289,30 +285,42 @@ fn parse_input(lines: &Vec<String>) -> AocResult<Instance> {
 fn solve(
     instance: &Instance,
     current_cost: i64,
-    current_min_cost: Rc<RefCell<i64>>,
+    current_min_cost: &RefCell<i64>,
+    cache: &RefCell<HashMap<Instance, i64>>,
 ) -> Option<i64> {
     if current_cost >= *current_min_cost.borrow() {
         return None;
     }
+
     if instance.is_solution() {
-        let mut mut_min = current_min_cost.borrow_mut();
-        if current_cost < *mut_min {
-            *mut_min = current_cost;
-        }
-        println!("Found solution with cost {current_cost}");
+        let mut current_min = current_min_cost.borrow_mut();
+        *current_min = min(current_cost, *current_min);
         return Some(current_cost);
     }
-    let moves = instance.moves();
-    if moves.is_empty() {
-        return None;
+
+    {
+        let mut c = cache.borrow_mut();
+        if let Some(cached_cost) = c.get(instance) {
+            if current_cost >= *cached_cost {
+                return None;
+            } else {
+                let inst = instance.clone();
+                c.insert(inst, current_cost);
+            }
+        } else {
+            c.insert(instance.clone(), current_cost);
+        }
     }
-    moves
+
+    instance
+        .moves()
         .into_iter()
-        .filter_map(|(mv, cost)| {
+        .filter_map(|(cost, mv)| {
             solve(
                 &instance.apply_move(mv),
                 current_cost + cost,
-                current_min_cost.clone(),
+                current_min_cost,
+                cache,
             )
         })
         .min()
@@ -320,8 +328,9 @@ fn solve(
 
 fn part_1(lines: &Vec<String>) -> AocResult<i64> {
     let instance = parse_input(&lines)?;
-    let current_min_cost = Rc::new(RefCell::new(i64::MAX));
-    Ok(solve(&instance, 0, current_min_cost).ok_or("No solution")?)
+    let current_min_cost = RefCell::new(i64::MAX);
+    let cache = RefCell::new(HashMap::new());
+    Ok(solve(&instance, 0, &current_min_cost, &cache).ok_or("No solution")?)
 }
 
 fn part_2(lines: &Vec<String>) -> AocResult<i64> {
@@ -329,8 +338,9 @@ fn part_2(lines: &Vec<String>) -> AocResult<i64> {
     lines.insert(3, "  #D#C#B#A#".to_string());
     lines.insert(4, "  #D#B#A#C#".to_string());
     let instance = parse_input(&lines)?;
-    let current_min_cost = Rc::new(RefCell::new(i64::MAX));
-    Ok(solve(&instance, 0, current_min_cost).ok_or("No solution")?)
+    let current_min_cost = RefCell::new(i64::MAX);
+    let cache = RefCell::new(HashMap::new());
+    Ok(solve(&instance, 0, &current_min_cost, &cache).ok_or("No solution")?)
 }
 
 fn main() -> AocResult<()> {
