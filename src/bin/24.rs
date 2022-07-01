@@ -6,8 +6,10 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::slice;
 use std::str::FromStr;
+use std::sync::{Arc, Mutex};
+use std::thread;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
 struct Register(i64);
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -40,7 +42,7 @@ use Instruction::*;
 use RVal::*;
 use RegisterName::*;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 struct Program {
     instructions: Vec<Instruction>,
 }
@@ -119,18 +121,19 @@ impl Program {
     }
 }
 
-struct Cpu {
+#[derive(Clone, Default)]
+pub struct Cpu {
     registers: [Register; 4],
 }
 
 impl Cpu {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             registers: [Register(0); 4],
         }
     }
 
-    fn reset(&mut self) {
+    pub fn reset(&mut self) {
         for mut r in &mut self.registers {
             r.0 = 0;
         }
@@ -273,54 +276,82 @@ fn parse_input(lines: &[String]) -> AocResult<Program> {
 
 fn solve(program: &Program, find_min: bool) -> AocResult<i64> {
     // Maps from zout -> input used to get that zout.
-    let mut ztable0 = HashMap::new();
-    let mut ztable1 = HashMap::new();
-    let mut target_input = if find_min {
+    let mut zt = Arc::new(HashMap::new());
+    let mut ztactive = vec![];
+    for _ in 0..9 {
+        ztactive.push(Arc::new(Mutex::new(HashMap::new())));
+    }
+    let target_input = if find_min {
         99999999999999i64
     } else {
         11111111111111i64
     };
-    ztable1.insert(0, 0);
+    Arc::get_mut(&mut zt).unwrap().insert(0, 0);
 
-    let mut cpu = Cpu::new();
     for i in 0..=13 {
-        let (ztactive, ztprev) = if i % 2 == 0 {
-            (&mut ztable0, &ztable1)
-        } else {
-            (&mut ztable1, &ztable0)
-        };
-
-        ztactive.clear();
-        let subprogram = program.subprogram(i, i + 1)?;
-        for (zout, input) in ztprev {
-            for j in 1..=9 {
-                cpu.reset();
-                cpu.write_register(Z, *zout);
-                cpu.exec(&subprogram, &[j])?;
-                let z = cpu.read_register(Z);
-                let new_input = 10 * (*input as i64) + j as i64;
-                if i < 13 {
-                    ztactive
-                        .entry(z)
-                        .and_modify(|e| {
-                            if (find_min && new_input < *e) || (!find_min && new_input > *e)
-                            {
-                                *e = new_input;
-                            }
-                        })
-                        .or_insert(new_input);
-                } else if z == 0 {
-                    target_input = if find_min {
-                        min(target_input, new_input)
-                    } else {
-                        max(target_input, new_input)
-                    };
+        let subprogram = Arc::new(program.subprogram(i, i + 1)?);
+        let mut handles = vec![];
+        for j in 1..=9 {
+            let zt = Arc::clone(&zt);
+            let zta = Arc::clone(&ztactive[j - 1]);
+            let subprogram = Arc::clone(&subprogram);
+            handles.push(thread::spawn(move || {
+                let mut target_input = target_input;
+                let mut zta = zta.lock().unwrap();
+                zta.clear();
+                for (zout, input) in &*zt {
+                    let mut cpu = Cpu::new();
+                    cpu.write_register(Z, *zout);
+                    cpu.exec(&subprogram, &[j as i8]).unwrap();
+                    let z = cpu.read_register(Z);
+                    let new_input = 10 * (*input as i64) + j as i64;
+                    if i < 13 {
+                        zta.entry(z)
+                            .and_modify(|e| {
+                                if (find_min && new_input < *e)
+                                    || (!find_min && new_input > *e)
+                                {
+                                    *e = new_input;
+                                }
+                            })
+                            .or_insert(new_input);
+                    } else if z == 0 {
+                        target_input = if find_min {
+                            min(target_input, new_input)
+                        } else {
+                            max(target_input, new_input)
+                        };
+                        if target_input == new_input {
+                            zta.insert(j as i64, target_input);
+                        }
+                    }
                 }
+            }));
+        }
+        for handle in handles {
+            handle.join().unwrap();
+        }
+        let zt = Arc::get_mut(&mut zt).unwrap();
+        zt.clear();
+        for zta in &ztactive {
+            for (k, v) in &*zta.lock().unwrap() {
+                zt.entry(*k)
+                    .and_modify(|e| {
+                        if (find_min && v < e) || (!find_min && v > e) {
+                            *e = *v;
+                        }
+                    })
+                    .or_insert(*v);
             }
         }
     }
 
-    Ok(target_input)
+    let out = if find_min {
+        zt.values().min()
+    } else {
+        zt.values().max()
+    };
+    Ok(*out.unwrap())
 }
 
 fn main() -> AocResult<()> {
