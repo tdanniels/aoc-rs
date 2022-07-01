@@ -16,7 +16,7 @@ fn parse_input(filename: &str) -> AocResult<(i64, i64, i64, i64)> {
     }
 
     let xslice = &line[line.find("x=").ok_or("No x=?")? + "x=".len()
-        ..line.find(",").ok_or("No first , ?")?];
+        ..line.find(',').ok_or("No first , ?")?];
     let xmin_xmax: Vec<i64> = xslice
         .split("..")
         .map(|s| s.parse::<i64>())

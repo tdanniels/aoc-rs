@@ -81,9 +81,9 @@ impl Instance {
                 let hall_start = self.room2hall[from.0];
                 let hall_end = self.room2hall[to.0];
                 let hall_vec: Vec<Location> = if hall_start < hall_end {
-                    (hall_start..=hall_end).map(|x| Hall(x)).collect()
+                    (hall_start..=hall_end).map(Hall).collect()
                 } else {
-                    (hall_end..=hall_start).rev().map(|x| Hall(x)).collect()
+                    (hall_end..=hall_start).rev().map(Hall).collect()
                 };
                 path.extend(hall_vec);
 
@@ -99,9 +99,9 @@ impl Instance {
                 let hall_start = self.room2hall[from.0];
                 let hall_end = to;
                 let hall_vec: Vec<Location> = if hall_start < hall_end {
-                    (hall_start..=hall_end).map(|x| Hall(x)).collect()
+                    (hall_start..=hall_end).map(Hall).collect()
                 } else {
-                    (hall_end..=hall_start).rev().map(|x| Hall(x)).collect()
+                    (hall_end..=hall_start).rev().map(Hall).collect()
                 };
                 path.extend(hall_vec);
             }
@@ -109,9 +109,9 @@ impl Instance {
                 let hall_start = from;
                 let hall_end = self.room2hall[to.0];
                 let hall_vec: Vec<Location> = if hall_start < hall_end {
-                    (hall_start + 1..=hall_end).map(|x| Hall(x)).collect()
+                    (hall_start + 1..=hall_end).map(Hall).collect()
                 } else {
-                    (hall_end..=hall_start - 1).rev().map(|x| Hall(x)).collect()
+                    (hall_end..=hall_start - 1).rev().map(Hall).collect()
                 };
                 path.extend(hall_vec);
 
@@ -271,7 +271,7 @@ fn parse_input(lines: &Vec<String>) -> AocResult<Instance> {
             .collect::<Vec<_>>();
         for r in 0..4 {
             room2hall[r] = roomparts[r].0;
-            rooms[r].insert(i, Some(roomparts[r].1.clone()));
+            rooms[r].insert(i, Some(roomparts[r].1));
         }
     }
     Ok(Instance {
@@ -327,7 +327,7 @@ fn solve(
 }
 
 fn part_1(lines: &Vec<String>) -> AocResult<i64> {
-    let instance = parse_input(&lines)?;
+    let instance = parse_input(lines)?;
     let current_min_cost = RefCell::new(i64::MAX);
     let cache = RefCell::new(HashMap::new());
     Ok(solve(&instance, 0, &current_min_cost, &cache).ok_or("No solution")?)

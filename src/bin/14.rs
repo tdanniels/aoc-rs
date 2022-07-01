@@ -17,7 +17,7 @@ fn parse_input(filename: &str) -> AocResult<(String, Rules)> {
         return failure(format!("Template {} isn't ascii", template));
     }
 
-    if lines.next().ok_or("Nothing after template?")?? != "" {
+    if !lines.next().ok_or("Nothing after template?")??.is_empty() {
         return failure("No empty line between template and rules?");
     }
     for line in lines {

@@ -291,7 +291,7 @@ impl Scanner {
                 if let Some((true_ofs, _)) =
                     offsets2counts.iter().find(|(_, v)| **v >= N_ALIGN)
                 {
-                    ofs = Some(true_ofs.clone());
+                    ofs = Some(*true_ofs);
                     ori = Some(orientation);
                     rot = Some(rotation);
                     break;
@@ -354,7 +354,7 @@ fn solve(mut problem: Problem) -> AocResult<(usize, i64)> {
     // It's wasteful to try to force the 'chaining' of scanners from scanner 0,
     // since we waste work on aligning scanners that, while they may align, aren't
     // the next pair in the chain. Is *is* simpler this way though.
-    while scanners_to_align.len() > 0 {
+    while !scanners_to_align.is_empty() {
         let mut did_align = false;
         'outer: for aligned_scanner_idx in &aligned_scanners {
             for (i, scanner_idx) in scanners_to_align.iter().enumerate() {

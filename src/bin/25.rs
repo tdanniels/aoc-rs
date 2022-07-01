@@ -42,12 +42,10 @@ fn part_1(grid: &Grid) -> AocResult<usize> {
                                 grids[future_grid].set(target_point, herd_type)?;
                                 grids[future_grid].set(current_point, 0)?;
                             }
-                        } else {
-                            if grids[next_grid].at(target_point)? == 0 {
-                                moved = true;
-                                grids[future_grid].set(target_point, herd_type)?;
-                                grids[future_grid].set(current_point, 0)?;
-                            }
+                        } else if grids[next_grid].at(target_point)? == 0 {
+                            moved = true;
+                            grids[future_grid].set(target_point, herd_type)?;
+                            grids[future_grid].set(current_point, 0)?;
                         }
                     }
                 }

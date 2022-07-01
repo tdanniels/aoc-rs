@@ -106,7 +106,7 @@ fn part_2(p1_start: u64, p2_start: u64) -> AocResult<u64> {
     );
     states_to_visit.push(start);
 
-    while states_to_visit.len() != 0 {
+    while !states_to_visit.is_empty() {
         let current_state = states_to_visit.pop().unwrap();
         if state2in_degree.contains_key(&current_state) {
             continue;

@@ -20,7 +20,7 @@ fn parse_input(filename: &str) -> AocResult<(Paper, Folds)> {
     let mut parsing_coords = true;
     for line in io::BufReader::new(file).lines() {
         let line = line?;
-        if line == "" {
+        if line.is_empty() {
             parsing_coords = false;
             continue;
         }
@@ -48,7 +48,7 @@ fn parse_input(filename: &str) -> AocResult<(Paper, Folds)> {
                 _ => failure(format!("Bad axis {}", axis)),
             }?;
             folds.push(fold);
-            if !split.next().is_none() {
+            if split.next().is_some() {
                 return failure("Multiple '=' on a fold line?");
             }
         }

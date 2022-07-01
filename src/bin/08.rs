@@ -86,7 +86,7 @@ fn solve_part2(lines: &Vec<String>) -> AocResult<u64> {
                     return false;
                 }
                 for (sigpat, _) in &sigpat2digit {
-                    if sigpat.chars().find(|c| &c == k).is_none() {
+                    if !sigpat.chars().any(|c| &&c == k) {
                         return false;
                     }
                 }
@@ -98,7 +98,7 @@ fn solve_part2(lines: &Vec<String>) -> AocResult<u64> {
         for (digit, len) in [(5, 5), (6, 6)] {
             let pattern = signal_patterns
                 .iter()
-                .find(|p| p.chars().find(|c| c == sig_c).is_none() && p.len() == len)
+                .find(|p| !p.chars().any(|c| &c == sig_c) && p.len() == len)
                 .ok_or(format!("No pattern found for {}?", digit))?;
             if sigpat2digit.insert(pattern, digit).is_some() {
                 return failure(format!("Overwrote the pattern for {}", digit));
@@ -112,10 +112,11 @@ fn solve_part2(lines: &Vec<String>) -> AocResult<u64> {
             .ok_or("No signal for 2?")?
             .0;
 
-        for (digit, len) in [(2, 5)] {
+        {
+            let (digit, len) = (2, 5);
             let pattern = signal_patterns
                 .iter()
-                .find(|p| p.chars().find(|c| c == sig_f).is_none() && p.len() == len)
+                .find(|p| !p.chars().any(|c| &c == sig_f) && p.len() == len)
                 .ok_or(format!("No pattern found for {}?", digit))?;
             if sigpat2digit.insert(pattern, digit).is_some() {
                 return failure(format!("Overwrote the pattern for {}", digit));
@@ -124,13 +125,14 @@ fn solve_part2(lines: &Vec<String>) -> AocResult<u64> {
 
         // 3. Which pattern of length 5, which is not the known pattern for 5, has sig_f set?
         // That pattern will correspond to 3.
-        for (digit, len) in [(3, 5)] {
+        {
+            let (digit, len) = (3, 5);
             let pattern = signal_patterns
                 .iter()
                 .find(|p| {
-                    p.chars().find(|c| c == sig_f).is_some()
+                    p.chars().any(|c| &c == sig_f)
                         && p.len() == len
-                        && sigpat2digit.iter().find(|(k, _)| k == p).is_none()
+                        && !sigpat2digit.iter().any(|(k, _)| k == p)
                 })
                 .ok_or(format!("No pattern found for {}?", digit))?;
             if sigpat2digit.insert(pattern, digit).is_some() {
@@ -155,13 +157,13 @@ fn solve_part2(lines: &Vec<String>) -> AocResult<u64> {
             .chars()
             .collect();
         let sig_e = sigs_6_hs
-            .difference(&sigs_5_hs)
-            .nth(0)
+            .difference(&sigs_5_hs).next()
             .ok_or("No difference?")?;
-        for (digit, len) in [(9, 6)] {
+        {
+            let (digit, len) = (9, 6);
             let pattern = signal_patterns
                 .iter()
-                .find(|p| p.chars().find(|c| c == sig_e).is_none() && p.len() == len)
+                .find(|p| !p.chars().any(|c| &c == sig_e) && p.len() == len)
                 .ok_or(format!("No pattern found for {}?", digit))?;
             if sigpat2digit.insert(pattern, digit).is_some() {
                 return failure(format!("Overwrote the pattern for {}", digit));
@@ -169,11 +171,12 @@ fn solve_part2(lines: &Vec<String>) -> AocResult<u64> {
         }
 
         // 0. sigs(0) the last remaining signal of length 6.
-        for (digit, len) in [(0, 6)] {
+        {
+            let (digit, len) = (0, 6);
             let pattern = signal_patterns
                 .iter()
                 .find(|p| {
-                    p.len() == len && sigpat2digit.iter().find(|(k, _)| k == p).is_none()
+                    p.len() == len && !sigpat2digit.iter().any(|(k, _)| k == p)
                 })
                 .ok_or(format!("No pattern found for {}?", digit))?;
             if sigpat2digit.insert(pattern, digit).is_some() {

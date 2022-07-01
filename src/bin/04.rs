@@ -66,7 +66,7 @@ impl Board {
                 return true;
             }
         }
-        return false;
+        false
     }
 
     fn calc_score(&self, last_number: i32) -> i64 {
@@ -154,7 +154,7 @@ fn part1(filename: &str) -> AocResult<i64> {
         }
     }
 
-    return failure("No wins!");
+    failure("No wins!")
 }
 
 fn part2(filename: &str) -> AocResult<i64> {
@@ -175,7 +175,7 @@ fn part2(filename: &str) -> AocResult<i64> {
             if b.is_win() {
                 scores.push(b.calc_score(x));
                 boards_that_have_won[i] = true;
-                if boards_that_have_won.iter().all(|&x| x == true) {
+                if boards_that_have_won.iter().all(|&x| x) {
                     let r = scores.pop();
                     match r {
                         Some(x) => return Ok(x),

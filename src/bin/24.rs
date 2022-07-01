@@ -309,14 +309,12 @@ fn solve(program: &Program, find_min: bool) -> AocResult<i64> {
                             }
                         })
                         .or_insert(new_input);
-                } else {
-                    if z == 0 {
-                        target_input = if find_min {
-                            min(target_input, new_input)
-                        } else {
-                            max(target_input, new_input)
-                        };
-                    }
+                } else if z == 0 {
+                    target_input = if find_min {
+                        min(target_input, new_input)
+                    } else {
+                        max(target_input, new_input)
+                    };
                 }
             }
         }

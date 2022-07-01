@@ -51,7 +51,7 @@ fn part1(filename: &str) -> i64 {
         }
     }
 
-    return gamma * epsilon;
+    gamma * epsilon
 }
 
 fn part2(filename: &str) -> i64 {
@@ -65,7 +65,7 @@ fn part2(filename: &str) -> i64 {
         for i in 0..width {
             if lines.len() == 1 {
                 break;
-            } else if lines.len() == 0 {
+            } else if lines.is_empty() {
                 panic!();
             }
 
@@ -86,12 +86,10 @@ fn part2(filename: &str) -> i64 {
                         } else {
                             x.chars().nth(i).unwrap() == '0'
                         }
+                    } else if counter.one < counter.zero {
+                        x.chars().nth(i).unwrap() == '1'
                     } else {
-                        if counter.one < counter.zero {
-                            x.chars().nth(i).unwrap() == '1'
-                        } else {
-                            x.chars().nth(i).unwrap() == '0'
-                        }
+                        x.chars().nth(i).unwrap() == '0'
                     }
                 })
                 .collect::<Vec<String>>();

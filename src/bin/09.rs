@@ -31,7 +31,7 @@ fn get_basin_size(grid: &Grid, starting_point: &Point) -> AocResult<u64> {
     let mut explored: HashSet<Point> = HashSet::new();
     explored.insert(*starting_point);
     q.push_back(*starting_point);
-    while q.len() > 0 {
+    while !q.is_empty() {
         let v = q.pop_front().unwrap();
         for neighbour in grid.neighbourhood(v, NeighbourPattern::Compass4).unwrap() {
             if let Some(neighbour) = neighbour {

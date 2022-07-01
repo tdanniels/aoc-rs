@@ -6,12 +6,12 @@ use std::collections::HashSet;
 /// be an infinite number of paths.
 fn part_1(graph: &UnweightedUndirectedGraph) -> AocResult<u64> {
     let visited_small_caves: HashSet<&str> = HashSet::new();
-    count_paths_to_end(&graph, "start", 0, &visited_small_caves, false, None)
+    count_paths_to_end(graph, "start", 0, &visited_small_caves, false, None)
 }
 
 fn part_2(graph: &UnweightedUndirectedGraph) -> AocResult<u64> {
     let visited_small_caves: HashSet<&str> = HashSet::new();
-    count_paths_to_end(&graph, "start", 0, &visited_small_caves, true, None)
+    count_paths_to_end(graph, "start", 0, &visited_small_caves, true, None)
 }
 
 fn count_paths_to_end(

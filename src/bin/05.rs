@@ -58,7 +58,7 @@ fn solve(filename: &str, consider_diags: bool) -> AocResult<i64> {
         let point_pair = {
             let point_vec = line?
                 .split(" -> ")
-                .map(|x| Point::from_str(x))
+                .map(Point::from_str)
                 .collect::<core::result::Result<Vec<_>, ParseIntError>>()?;
             if point_vec.len() != 2 {
                 return failure("Badly formatted point");

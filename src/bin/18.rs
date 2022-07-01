@@ -85,7 +85,6 @@ fn try_split(node: &NodeWrapper) -> bool {
             false
         }
     }) {
-        let large_node = NodeWrapper::from(large_node);
         let data = large_node.get_data().unwrap();
         let new_left = Node::new(Some(data / 2));
         let new_right = Node::new(Some(data / 2 + if data % 2 != 0 { 1 } else { 0 }));
@@ -125,7 +124,7 @@ fn parse_input(lines: &Vec<String>) -> AocResult<Vec<Vec<NodeWrapper>>> {
             return failure("Non-ascii line");
         }
         if l.trim() == "" {
-            if problem.len() > 0 {
+            if !problem.is_empty() {
                 problems.push(problem);
                 problem = Vec::new();
             }

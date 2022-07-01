@@ -18,7 +18,7 @@ fn sim(grid: &mut Grid) -> AocResult<u64> {
             }
         }
     }
-    while to_flash.len() > 0 {
+    while !to_flash.is_empty() {
         let p = to_flash.pop().ok_or("Empty vec?")?;
         flashes += 1;
         grid.set(p, 0)?;

@@ -13,7 +13,7 @@ impl BitVec {
     fn from_hex_str(hex: &str) -> AocResult<Self> {
         let mut out = Vec::with_capacity(hex.len() / 2);
         for chunk in hex.as_bytes().chunks(2) {
-            let s = String::from_utf8(chunk.into_iter().map(|x| *x).collect::<Vec<u8>>())?;
+            let s = String::from_utf8(chunk.to_vec())?;
             let mut b = u8::from_str_radix(&s, 16)?;
             if s.len() == 1 {
                 b <<= 4;
@@ -33,7 +33,7 @@ impl BitVec {
                 idx, self.bit_len
             ));
         }
-        let byte_idx = idx / 8 as usize;
+        let byte_idx = idx / 8_usize;
         let byte = self.store[byte_idx];
         let bit_index_in_byte = 8 - (idx % 8) - 1;
         let bit = (byte >> bit_index_in_byte) & 1;
@@ -253,7 +253,7 @@ fn sum_versions(packet: &Packet) -> AocResult<u64> {
         Packet::Operator(packet) => {
             let mut sum = packet.header.version as u64;
             for packet in &packet.payload {
-                sum += sum_versions(&packet)?;
+                sum += sum_versions(packet)?;
             }
             Ok(sum)
         }
@@ -273,17 +273,17 @@ fn eval(packet: &Packet) -> AocResult<u64> {
             OperatorSum => Ok(packet
                 .payload
                 .iter()
-                .map(|p| eval(p))
+                .map(eval)
                 .sum::<Result<u64, _>>()?),
             OperatorProd => Ok(packet
                 .payload
                 .iter()
-                .map(|p| eval(p))
+                .map(eval)
                 .product::<Result<u64, _>>()?),
             OperatorMin => Ok(*packet
                 .payload
                 .iter()
-                .map(|p| eval(p))
+                .map(eval)
                 .collect::<Result<Vec<_>, _>>()?
                 .iter()
                 .min()
@@ -291,7 +291,7 @@ fn eval(packet: &Packet) -> AocResult<u64> {
             OperatorMax => Ok(*packet
                 .payload
                 .iter()
-                .map(|p| eval(p))
+                .map(eval)
                 .collect::<Result<Vec<_>, _>>()?
                 .iter()
                 .max()
@@ -408,7 +408,7 @@ mod tests {
     fn part_1_test_1() -> AocResult<()> {
         let testfile = File::open(get_test_file(file!())?)?;
         let mut lines = io::BufReader::new(testfile).lines();
-        assert_eq!(part_1(&lines.nth(0).ok_or("No input?")??)?, 16);
+        assert_eq!(part_1(&lines.next().ok_or("No input?")??)?, 16);
         Ok(())
     }
 
