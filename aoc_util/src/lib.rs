@@ -149,7 +149,7 @@ impl Grid {
                     u8::try_from(
                         c.to_digit(10)
                             .ok_or("Bad char")
-                            .map_err(|e| AocError::new(e))?,
+                            .map_err(AocError::new)?,
                     )
                     .map_err(|e| AocError::new(&e.to_string()))
                 })
@@ -342,7 +342,7 @@ impl Grid {
             idx: start_index,
         }));
 
-        while q.len() != 0 {
+        while !q.is_empty() {
             let u_index = q.pop().unwrap().0.idx;
             let u_point = self.point_from_index(u_index)?;
             for v in self.neighbourhood(u_point, neighbour_pattern)? {
@@ -359,7 +359,7 @@ impl Grid {
                     if alt < dist[v_index].map_or(u64::MAX, |x| x) {
                         dist[v_index] = Some(alt);
                         prev[v_index] = Some(u_index);
-                        if q.iter().find(|&x| x.0.idx == v_index).is_none() {
+                        if !q.iter().any(|x| x.0.idx == v_index) {
                             q.push(Reverse(DistIdx {
                                 dist: alt,
                                 idx: v_index,
@@ -683,19 +683,11 @@ impl From<NodeLink> for NodeWrapper {
 
 impl NodeWrapper {
     pub fn get_left(&self) -> Option<NodeWrapper> {
-        if let Some(left) = &self.0.borrow().left {
-            Some(left.clone().into())
-        } else {
-            None
-        }
+        self.0.borrow().left.as_ref().map(|left| left.clone().into())
     }
 
     pub fn get_right(&self) -> Option<NodeWrapper> {
-        if let Some(right) = &self.0.borrow().right {
-            Some(right.clone().into())
-        } else {
-            None
-        }
+        self.0.borrow().right.as_ref().map(|right| right.clone().into())
     }
 
     pub fn get_data(&self) -> Option<i64> {
@@ -703,11 +695,7 @@ impl NodeWrapper {
     }
 
     pub fn get_parent(&self) -> Option<NodeWrapper> {
-        if let Some(parent) = &self.0.borrow().parent {
-            Some(parent.upgrade().unwrap().into())
-        } else {
-            None
-        }
+        self.0.borrow().parent.as_ref().map(|parent| parent.upgrade().unwrap().into())
     }
 
     pub fn set_left(&self, child: Option<&NodeWrapper>) {
@@ -745,7 +733,7 @@ impl NodeWrapper {
     }
 
     pub fn from_ascii(ascii: &[u8]) -> AocResult<NodeWrapper> {
-        Ok(NodeWrapper::from(NodeWrapper::_from_ascii(ascii)?.0))
+        Ok(NodeWrapper::_from_ascii(ascii)?.0)
     }
 
     pub fn inner(&self) -> NodeLink {
@@ -757,7 +745,7 @@ impl NodeWrapper {
     /// Current limitations: no whitespace, only single digit numbers supported.
     fn _from_ascii(ascii: &[u8]) -> AocResult<(NodeWrapper, usize)> {
         if ascii[0] != b'[' {
-            return failure(format!("Invalid line start"));
+            return failure("Invalid line start");
         }
 
         let mut consumed = 0;
@@ -780,7 +768,7 @@ impl NodeWrapper {
                     }
                 }
                 b'0'..=b'9' => {
-                    if (!seen_comma && pair.len() != 0) || (seen_comma && pair.len() == 0) {
+                    if (!seen_comma && !pair.is_empty()) || (seen_comma && pair.is_empty()) {
                         return failure("Invalid digit location");
                     }
                     pair.push(Node::new(Some((c - 48) as i64)).into());
@@ -802,8 +790,8 @@ impl NodeWrapper {
                     }
                     consumed += 1;
                     let node = NodeWrapper::from(Node::new(None));
-                    node.set_left(Some(&pair.remove(0).into()));
-                    node.set_right(Some(&pair.remove(0).into()));
+                    node.set_left(Some(&pair.remove(0)));
+                    node.set_right(Some(&pair.remove(0)));
                     return Ok((node, consumed));
                 }
                 _ => return failure("Invalid character"),
@@ -822,8 +810,8 @@ impl NodeWrapper {
         if let Some(data) = self.get_data() {
             data.to_string()
         } else {
-            let left_string = NodeWrapper::from(self.get_left().unwrap()).to_string();
-            let right_string = NodeWrapper::from(self.get_right().unwrap()).to_string();
+            let left_string = self.get_left().unwrap().to_string();
+            let right_string = self.get_right().unwrap().to_string();
             "[".to_string() + left_string.as_str() + "," + right_string.as_str() + "]"
         }
     }
@@ -844,7 +832,7 @@ impl Iterator for DepthFirstIterator {
     type Item = (NodeWrapper, usize);
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.stack.len() != 0 {
+        if !self.stack.is_empty() {
             let (node, depth) = self.stack.pop().unwrap();
 
             // Push right first so that we pop left first.
@@ -900,7 +888,7 @@ mod nodewrapper_tests {
             let depths = t
                 .depth_first_iter()
                 .filter_map(|(node, depth)| {
-                    if let Some(_) = node.get_data() {
+                    if node.get_data().is_some() {
                         Some(depth)
                     } else {
                         None
@@ -939,7 +927,7 @@ impl FromStr for Cuboid {
             let start =
                 s.find(prefix).ok_or(format!("No prefix \"{}\"?", prefix))? + prefix.len();
             let end = if has_suffix {
-                start + s[start..].find(",").ok_or("No suffix \",\"?")?
+                start + s[start..].find(',').ok_or("No suffix \",\"?")?
             } else {
                 s.len()
             };
@@ -995,7 +983,7 @@ impl Cuboid {
     pub fn union(&self, other: &Cuboid) -> Vec<Cuboid> {
         if self.contains(other) {
             vec![self.clone()]
-        } else if other.contains(&self) {
+        } else if other.contains(self) {
             vec![other.clone()]
         } else if self.intersects(other) {
             let mut out = vec![self.clone()];
@@ -1078,7 +1066,7 @@ impl Cuboid {
                 out.push(Cuboid::new(co.0, co.1, co.2, co.3, co.4, co.5).unwrap());
             }
         }
-        debug_assert!(out.iter().all(|c| !c.intersects(&self)));
+        debug_assert!(out.iter().all(|c| !c.intersects(self)));
         debug_assert!(out.iter().enumerate().all(|(i, c1)| out
             .iter()
             .enumerate()
@@ -1094,7 +1082,7 @@ impl Cuboid {
             // Extend `intersection` in all 26 possible directions, and take the
             // intersection of `ext` and `self` to obtain a possible partial difference
             // cuboid. If the new intersection is empty, skip it, otherwise add it to `out`.
-            for ext in intersection.extensions(&self) {
+            for ext in intersection.extensions(self) {
                 if let Some(inter) = self.intersection(&ext) {
                     out.push(inter);
                 }
@@ -1265,7 +1253,8 @@ mod cuboid_tests {
 
     #[test]
     fn cuboid_from_str() -> AocResult<()> {
-        for s in ["x=-23..22,y=-17..33,z=-1..44"] {
+        {
+            let s = "x=-23..22,y=-17..33,z=-1..44";
             let c = Cuboid::from_str(s)?;
             assert_eq!(c, Cuboid::new(-23, 22, -17, 33, -1, 44)?);
         }
@@ -1397,7 +1386,7 @@ pub struct PolyCuboid {
 impl fmt::Display for PolyCuboid {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for c in self.iter() {
-            write!(f, "{}\n", c)?;
+            writeln!(f, "{}", c)?;
         }
         Ok(())
     }
