@@ -48,8 +48,8 @@ fn step_pair_counts(
         let production = pair_productions
             .get(p)
             .ok_or(format!("No production for pair {:?}?", p))?;
-        for i in 0..2 {
-            let out_entry = out.entry(production[i]).or_insert(0);
+        for p in production.iter().take(2) {
+            let out_entry = out.entry(*p).or_insert(0);
             *out_entry += c;
         }
     }
@@ -81,8 +81,8 @@ fn solve(template: &str, rules: &Rules, n_steps: u32) -> AocResult<usize> {
 
     let mut element2count: HashMap<u8, usize> = HashMap::new();
     pair_counts.iter().for_each(|(p, c)| {
-        for i in 0..2 {
-            let entry = element2count.entry(p[i]).or_insert(0);
+        for p in p.iter().take(2) {
+            let entry = element2count.entry(*p).or_insert(0);
             *entry += c;
         }
     });

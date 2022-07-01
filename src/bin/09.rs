@@ -33,16 +33,19 @@ fn get_basin_size(grid: &Grid, starting_point: &Point) -> AocResult<u64> {
     q.push_back(*starting_point);
     while !q.is_empty() {
         let v = q.pop_front().unwrap();
-        for neighbour in grid.neighbourhood(v, NeighbourPattern::Compass4).unwrap() {
-            if let Some(neighbour) = neighbour {
-                let neighbour_height = neighbour.1;
-                if neighbour_height <= grid.at(v)? || neighbour_height == 9 {
-                    continue;
-                }
-                if explored.get(&neighbour.0).is_none() {
-                    explored.insert(neighbour.0);
-                    q.push_back(neighbour.0);
-                }
+        for neighbour in grid
+            .neighbourhood(v, NeighbourPattern::Compass4)
+            .unwrap()
+            .into_iter()
+            .flatten()
+        {
+            let neighbour_height = neighbour.1;
+            if neighbour_height <= grid.at(v)? || neighbour_height == 9 {
+                continue;
+            }
+            if explored.get(&neighbour.0).is_none() {
+                explored.insert(neighbour.0);
+                q.push_back(neighbour.0);
             }
         }
     }

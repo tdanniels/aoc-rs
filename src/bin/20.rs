@@ -2,7 +2,7 @@ use aoc_util::{failure, get_cli_arg, AocResult, Grid, NeighbourPattern, Point};
 use std::fs::File;
 use std::io::{self, BufRead};
 
-fn parse_input(lines: &Vec<String>) -> AocResult<(Grid, Grid)> {
+fn parse_input(lines: &[String]) -> AocResult<(Grid, Grid)> {
     let map_func = |c| match c {
         '.' => Some(0),
         '#' => Some(1),

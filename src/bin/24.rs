@@ -265,7 +265,7 @@ impl FromStr for Instruction {
     }
 }
 
-fn parse_input(lines: &Vec<String>) -> AocResult<Program> {
+fn parse_input(lines: &[String]) -> AocResult<Program> {
     let mut prog = Program::from_listing(lines)?;
     prog.optimize();
     Ok(prog)

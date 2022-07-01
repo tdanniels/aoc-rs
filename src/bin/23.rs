@@ -239,7 +239,7 @@ impl Instance {
     }
 }
 
-fn parse_input(lines: &Vec<String>) -> AocResult<Instance> {
+fn parse_input(lines: &[String]) -> AocResult<Instance> {
     let mut it = lines.iter();
     let hall_width = it
         .nth(1)
@@ -326,15 +326,15 @@ fn solve(
         .min()
 }
 
-fn part_1(lines: &Vec<String>) -> AocResult<i64> {
+fn part_1(lines: &[String]) -> AocResult<i64> {
     let instance = parse_input(lines)?;
     let current_min_cost = RefCell::new(i64::MAX);
     let cache = RefCell::new(HashMap::new());
     Ok(solve(&instance, 0, &current_min_cost, &cache).ok_or("No solution")?)
 }
 
-fn part_2(lines: &Vec<String>) -> AocResult<i64> {
-    let mut lines = lines.clone();
+fn part_2(lines: &[String]) -> AocResult<i64> {
+    let mut lines = lines.to_vec();
     lines.insert(3, "  #D#C#B#A#".to_string());
     lines.insert(4, "  #D#B#A#C#".to_string());
     let instance = parse_input(&lines)?;

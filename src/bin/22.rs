@@ -8,7 +8,7 @@ struct Op {
     cuboid: Cuboid,
 }
 
-fn parse_input(lines: &Vec<String>) -> AocResult<Vec<Op>> {
+fn parse_input(lines: &[String]) -> AocResult<Vec<Op>> {
     lines
         .iter()
         .map(|l| {
@@ -24,7 +24,7 @@ fn parse_input(lines: &Vec<String>) -> AocResult<Vec<Op>> {
         .collect::<Result<Vec<_>, _>>()
 }
 
-fn part_1(ops: &Vec<Op>) -> AocResult<i64> {
+fn part_1(ops: &[Op]) -> AocResult<i64> {
     let filter_cuboid = Cuboid::new(-50, 50, -50, 50, -50, 50)?;
     let filtered_ops: Vec<&Op> = ops
         .iter()

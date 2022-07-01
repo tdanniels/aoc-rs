@@ -124,6 +124,7 @@ fn parse_boards(
 
         row += 1;
 
+        #[allow(clippy::comparison_chain)]
         if row == 5 {
             boards.push(board);
             board = Board::new();

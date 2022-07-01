@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::{self, BufRead};
 
-fn solve_part1(lines: &Vec<String>) -> AocResult<u64> {
+fn solve_part1(lines: &[String]) -> AocResult<u64> {
     let segct2digs = [
         vec![],
         vec![],
@@ -85,7 +85,7 @@ fn solve_part2(lines: &Vec<String>) -> AocResult<u64> {
                 if v != 8 {
                     return false;
                 }
-                for (sigpat, _) in &sigpat2digit {
+                for sigpat in sigpat2digit.keys() {
                     if !sigpat.chars().any(|c| &&c == k) {
                         return false;
                     }
