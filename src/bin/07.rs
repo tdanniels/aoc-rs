@@ -63,7 +63,10 @@ mod tests {
 
     #[test]
     fn part_2_input() -> AocResult<()> {
-        assert_eq!(solve(&get_input_file(file!())?, Cost::Quadratic)?, 104149091);
+        assert_eq!(
+            solve(&get_input_file(file!())?, Cost::Quadratic)?,
+            104149091
+        );
         Ok(())
     }
 }

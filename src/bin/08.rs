@@ -157,7 +157,8 @@ fn solve_part2(lines: &Vec<String>) -> AocResult<u64> {
             .chars()
             .collect();
         let sig_e = sigs_6_hs
-            .difference(&sigs_5_hs).next()
+            .difference(&sigs_5_hs)
+            .next()
             .ok_or("No difference?")?;
         {
             let (digit, len) = (9, 6);
@@ -175,9 +176,7 @@ fn solve_part2(lines: &Vec<String>) -> AocResult<u64> {
             let (digit, len) = (0, 6);
             let pattern = signal_patterns
                 .iter()
-                .find(|p| {
-                    p.len() == len && !sigpat2digit.iter().any(|(k, _)| k == p)
-                })
+                .find(|p| p.len() == len && !sigpat2digit.iter().any(|(k, _)| k == p))
                 .ok_or(format!("No pattern found for {}?", digit))?;
             if sigpat2digit.insert(pattern, digit).is_some() {
                 return failure(format!("Overwrote the pattern for {}", digit));

@@ -270,11 +270,7 @@ fn eval(packet: &Packet) -> AocResult<u64> {
     match packet {
         Packet::Literal(packet) => Ok(packet.value),
         Packet::Operator(packet) => match packet.header.type_id.try_into()? {
-            OperatorSum => Ok(packet
-                .payload
-                .iter()
-                .map(eval)
-                .sum::<Result<u64, _>>()?),
+            OperatorSum => Ok(packet.payload.iter().map(eval).sum::<Result<u64, _>>()?),
             OperatorProd => Ok(packet
                 .payload
                 .iter()
