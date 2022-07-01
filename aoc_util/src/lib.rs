@@ -146,12 +146,8 @@ impl Grid {
             .iter()
             .flat_map(|s| {
                 s.chars().map(|c| {
-                    u8::try_from(
-                        c.to_digit(10)
-                            .ok_or("Bad char")
-                            .map_err(AocError::new)?,
-                    )
-                    .map_err(|e| AocError::new(&e.to_string()))
+                    u8::try_from(c.to_digit(10).ok_or("Bad char").map_err(AocError::new)?)
+                        .map_err(|e| AocError::new(&e.to_string()))
                 })
             })
             .collect::<Result<Vec<_>, _>>()?;
@@ -345,26 +341,28 @@ impl Grid {
         while !q.is_empty() {
             let u_index = q.pop().unwrap().0.idx;
             let u_point = self.point_from_index(u_index)?;
-            for v in self.neighbourhood(u_point, neighbour_pattern)? {
-                if let Some(v) = v {
-                    let v_index = self.index_from_point(v.0)?;
-                    let alt = {
-                        if let Some(d) = dist[u_index] {
-                            d + v.1 as u64
-                        } else {
-                            u64::MAX
-                        }
-                    };
+            for v in self
+                .neighbourhood(u_point, neighbour_pattern)?
+                .into_iter()
+                .flatten()
+            {
+                let v_index = self.index_from_point(v.0)?;
+                let alt = {
+                    if let Some(d) = dist[u_index] {
+                        d + v.1 as u64
+                    } else {
+                        u64::MAX
+                    }
+                };
 
-                    if alt < dist[v_index].map_or(u64::MAX, |x| x) {
-                        dist[v_index] = Some(alt);
-                        prev[v_index] = Some(u_index);
-                        if !q.iter().any(|x| x.0.idx == v_index) {
-                            q.push(Reverse(DistIdx {
-                                dist: alt,
-                                idx: v_index,
-                            }));
-                        }
+                if alt < dist[v_index].map_or(u64::MAX, |x| x) {
+                    dist[v_index] = Some(alt);
+                    prev[v_index] = Some(u_index);
+                    if !q.iter().any(|x| x.0.idx == v_index) {
+                        q.push(Reverse(DistIdx {
+                            dist: alt,
+                            idx: v_index,
+                        }));
                     }
                 }
             }
@@ -599,9 +597,9 @@ impl UnweightedUndirectedGraph {
                 return failure(format!("Malformed edge {:?} in input", edge));
             }
 
-            for i in 0..2 {
-                if node2index.get(&edge[i]).is_none() {
-                    nodes.push(edge[i].clone());
+            for e in edge.iter().take(2) {
+                if node2index.get(e).is_none() {
+                    nodes.push(e.clone());
                     node2index.insert(nodes[nodes.len() - 1].clone(), nodes.len() - 1);
                 }
             }
@@ -681,13 +679,44 @@ impl From<NodeLink> for NodeWrapper {
     }
 }
 
+impl fmt::Display for NodeWrapper {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // TODO currently only supports trees with (required) data at leaves.
+        if self.is_leaf() && !self.has_data() {
+            panic!("Invalid tree: leaf with no data");
+        }
+        if !self.is_leaf() && self.has_data() {
+            panic!("Invalid tree: non-leaf with data");
+        }
+        if let Some(data) = self.get_data() {
+            write!(f, "{}", data)
+        } else {
+            let left_string = self.get_left().unwrap().to_string();
+            let right_string = self.get_right().unwrap().to_string();
+            write!(
+                f,
+                "{}",
+                "[".to_string() + left_string.as_str() + "," + right_string.as_str() + "]"
+            )
+        }
+    }
+}
+
 impl NodeWrapper {
     pub fn get_left(&self) -> Option<NodeWrapper> {
-        self.0.borrow().left.as_ref().map(|left| left.clone().into())
+        self.0
+            .borrow()
+            .left
+            .as_ref()
+            .map(|left| left.clone().into())
     }
 
     pub fn get_right(&self) -> Option<NodeWrapper> {
-        self.0.borrow().right.as_ref().map(|right| right.clone().into())
+        self.0
+            .borrow()
+            .right
+            .as_ref()
+            .map(|right| right.clone().into())
     }
 
     pub fn get_data(&self) -> Option<i64> {
@@ -695,7 +724,11 @@ impl NodeWrapper {
     }
 
     pub fn get_parent(&self) -> Option<NodeWrapper> {
-        self.0.borrow().parent.as_ref().map(|parent| parent.upgrade().unwrap().into())
+        self.0
+            .borrow()
+            .parent
+            .as_ref()
+            .map(|parent| parent.upgrade().unwrap().into())
     }
 
     pub fn set_left(&self, child: Option<&NodeWrapper>) {
@@ -796,23 +829,6 @@ impl NodeWrapper {
                 }
                 _ => return failure("Invalid character"),
             }
-        }
-    }
-
-    pub fn to_string(&self) -> String {
-        // TODO currently only supports trees with (required) data at leaves.
-        if self.is_leaf() && !self.has_data() {
-            panic!("Invalid tree: leaf with no data");
-        }
-        if !self.is_leaf() && self.has_data() {
-            panic!("Invalid tree: non-leaf with data");
-        }
-        if let Some(data) = self.get_data() {
-            data.to_string()
-        } else {
-            let left_string = self.get_left().unwrap().to_string();
-            let right_string = self.get_right().unwrap().to_string();
-            "[".to_string() + left_string.as_str() + "," + right_string.as_str() + "]"
         }
     }
 }
@@ -1378,7 +1394,7 @@ mod cuboid_tests {
 }
 
 /// Contains disjoint cuboids
-#[derive(Debug)]
+#[derive(Default, Debug)]
 pub struct PolyCuboid {
     cuboids: Vec<Cuboid>,
 }
@@ -1538,7 +1554,7 @@ mod polycuboid_tests {
     }
 }
 
-#[derive(Debug)]
+#[derive(Default, Debug)]
 pub struct PolyHashCuboid {
     voxels: HashSet<(i64, i64, i64)>,
 }
