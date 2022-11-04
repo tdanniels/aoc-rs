@@ -1,7 +1,7 @@
 use aoc_util::{
+    cuboid::{Cuboid, PolyCuboid},
     errors::{failure, AocResult},
     io::get_cli_arg,
-    cuboid::{Cuboid, PolyCuboid}
 };
 use std::fs::File;
 use std::io::{self, BufRead};

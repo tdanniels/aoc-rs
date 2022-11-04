@@ -1,7 +1,7 @@
 use aoc_util::{
     errors::{failure, AocResult},
+    graph::{Node, NodeWrapper},
     io::get_cli_arg,
-    graph::{Node, NodeWrapper}
 };
 use std::cmp;
 use std::fs::File;
