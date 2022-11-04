@@ -1,4 +1,4 @@
-Solutions to Advent of Code 2021 in Rust.
+Solutions to Advent of Code 2021.
 
 This year, in an attempt to better learn what's in (and not in) Rust's standard
 library, I imposed upon myself the arbitary restriction of using no external
