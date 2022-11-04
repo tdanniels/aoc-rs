@@ -41,19 +41,20 @@ fn solve_part2(lines: &Vec<String>) -> AocResult<u64> {
     // Initially known: sigs(1), sigs(4), sigs(7), sigs(8)
     // == 1478
     // 1. sigs(7) - sigs(1) = sig(a)
-    // 2. There are only two initially unknown signal patterns that don't include a signal - in
-    //    this case, sig(c). One of them, sigs(5), is of length 5, and the other, sigs(6),
+    // 2. There are only two initially unknown signal patterns that don't include a signal -
+    //    in this case, sig(c). One of them, sigs(5), is of length 5, and the other, sigs(6),
     //    is of length 6. From this we can deduce sig(c), sigs(5), and sigs(6).
     // == 145678
     // 3. sigs(6) - sigs(5) = sig(e).
     // 4. Only one signal pattern, sigs(2), does not include sig(f). From this
     //    we can deduce sigs(2) and sig(f).
     // == 1245678
-    // 5. sigs(3) is the signal pattern of length 5 (that is not the known pattern for 5) with sig(f) set.
+    // 5. sigs(3) is the signal pattern of length 5 (that is not the known pattern for 5)
+    //    with sig(f) set.
     // == 12345678
     // 7. sigs(9) is the signal pattern of length 6 with sig(e) not set.
     // == 123456789
-    // 8. sigs(0) the last remaining signal of length 6.
+    // 8. sigs(0) is the last remaining signal of length 6.
     // == 0123456789
 
     let mut sum: u64 = 0;
@@ -174,7 +175,7 @@ fn solve_part2(lines: &Vec<String>) -> AocResult<u64> {
             }
         }
 
-        // 0. sigs(0) the last remaining signal of length 6.
+        // 0. sigs(0) is the last remaining signal of length 6.
         {
             let (digit, len) = (0, 6);
             let pattern = signal_patterns
