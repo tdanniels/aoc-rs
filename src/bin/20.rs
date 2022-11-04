@@ -1,4 +1,9 @@
-use aoc_util::{failure, get_cli_arg, AocResult, Grid, NeighbourPattern, Point};
+use aoc_util::{
+    errors::{failure, AocResult},
+    grid::{Grid, NeighbourPattern},
+    io::get_cli_arg,
+    point::Point,
+};
 use std::fs::File;
 use std::io::{self, BufRead};
 
@@ -71,7 +76,7 @@ fn main() -> AocResult<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use aoc_util::{get_input_file, get_test_file};
+    use aoc_util::io::{get_input_file, get_test_file};
 
     #[test]
     fn part_1_test() -> AocResult<()> {

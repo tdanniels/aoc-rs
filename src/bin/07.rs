@@ -1,4 +1,4 @@
-use aoc_util::{get_cli_arg, AocResult};
+use aoc_util::{errors::AocResult, io::get_cli_arg};
 use std::fs;
 
 enum Cost {
@@ -41,7 +41,7 @@ fn main() -> AocResult<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use aoc_util::{get_input_file, get_test_file};
+    use aoc_util::io::{get_input_file, get_test_file};
 
     #[test]
     fn part_1_test() -> AocResult<()> {

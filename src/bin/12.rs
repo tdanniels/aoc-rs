@@ -1,4 +1,4 @@
-use aoc_util::{get_cli_arg, AocResult, UnweightedUndirectedGraph};
+use aoc_util::{errors::AocResult, graph::UnweightedUndirectedGraph, io::get_cli_arg};
 use std::collections::HashSet;
 
 /// It appears to be an unstated fact of this problem that large caves
@@ -69,7 +69,7 @@ fn main() -> AocResult<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use aoc_util::{get_input_file, get_test_file};
+    use aoc_util::io::{get_input_file, get_test_file};
 
     #[test]
     fn part_1_test() -> AocResult<()> {

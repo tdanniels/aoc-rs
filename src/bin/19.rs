@@ -1,4 +1,4 @@
-use aoc_util::{get_cli_arg, AocResult};
+use aoc_util::{errors::AocResult, io::get_cli_arg};
 use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::fs::File;
 use std::io::{self, BufRead};
@@ -404,7 +404,7 @@ fn main() -> AocResult<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use aoc_util::{get_input_file, get_test_file};
+    use aoc_util::io::{get_input_file, get_test_file};
 
     #[test]
     fn point_align() -> AocResult<()> {
