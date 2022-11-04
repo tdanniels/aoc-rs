@@ -26,17 +26,20 @@ impl UnweightedUndirectedGraph {
     /// Note that in this format, nodes with no edges are unrepresentable. Something
     /// to fix once an AoC problem requires it.
     pub fn from_file(filename: &str) -> AocResult<Self> {
+        Self::from_bufreader(&mut io::BufReader::new(File::open(filename)?))
+    }
+
+    pub fn from_bufreader<R: BufRead>(bufreader: R) -> AocResult<Self> {
         let mut edgesets: Vec<HashSet<usize>> = Vec::new();
         let mut names = Vec::new();
         let mut name2node = HashMap::new();
 
-        let file = File::open(filename)?;
-        for line in io::BufReader::new(file).lines() {
+        for line in bufreader.lines() {
             let edge_strings = line?.split('-').map(String::from).collect::<Vec<String>>();
             if edge_strings.len() != 2
                 || !edge_strings
                     .iter()
-                    .all(|v| v.chars().all(|c| c.is_ascii_alphabetic()))
+                    .all(|v| v != "" && v.chars().all(|c| c.is_ascii_alphabetic()))
             {
                 return failure(format!("Malformed edge {:?} in input", edge_strings));
             }
@@ -77,5 +80,56 @@ impl UnweightedUndirectedGraph {
             .iter()
             .map(|v| self.names[*v].as_str())
             .collect())
+    }
+}
+
+#[cfg(test)]
+mod graph_tests {
+    use super::*;
+
+    #[test]
+    fn graph_neighbour_names() -> AocResult<()> {
+        let gs = "\
+a-b
+b-c
+b-a
+a-d
+";
+        let g = UnweightedUndirectedGraph::from_bufreader(gs.as_bytes())?;
+
+        let mut ns = g.neighbour_names("a")?;
+        ns.sort();
+        assert_eq!(ns, vec!["b", "d"]);
+
+        ns = g.neighbour_names("b")?;
+        ns.sort();
+        assert_eq!(ns, vec!["a", "c"]);
+
+        ns = g.neighbour_names("c")?;
+        ns.sort();
+        assert_eq!(ns, vec!["b"]);
+
+        ns = g.neighbour_names("d")?;
+        ns.sort();
+        assert_eq!(ns, vec!["a"]);
+        Ok(())
+    }
+
+    #[test]
+    fn graph_invalid() -> AocResult<()> {
+        for gs in [
+            "\
+a-b
+b-
+",
+            "a\
+",
+            "a-b-c\
+",
+        ] {
+            let g = UnweightedUndirectedGraph::from_bufreader(gs.as_bytes());
+            assert!(g.is_err());
+        }
+        Ok(())
     }
 }
