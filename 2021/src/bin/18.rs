@@ -1,6 +1,6 @@
 use aoc_util::{
     errors::{failure, AocResult},
-    graph::{Node, NodeWrapper},
+    binarytree::{Node, NodeWrapper},
     io::get_cli_arg,
 };
 use std::cmp;

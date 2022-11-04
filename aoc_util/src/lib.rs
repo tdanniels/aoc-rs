@@ -1,3 +1,4 @@
+pub mod binarytree;
 pub mod cuboid;
 pub mod errors;
 pub mod graph;
