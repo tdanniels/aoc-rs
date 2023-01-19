@@ -1,7 +1,7 @@
 Solutions to Advent of Code 2021.
 
 This year, in an attempt to better learn what's in (and not in) Rust's standard
-library, I imposed upon myself the arbitary restriction of using no external
+library, I imposed upon myself the arbitrary restriction of using no external
 crates other than ones I'd written. And aside from really missing `anyhow` and
 occasionally wishing I had access to `itertools`, the experience was quite
 nice.
