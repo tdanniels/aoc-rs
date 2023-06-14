@@ -60,7 +60,7 @@ fn get_basin_size(grid: &Grid, starting_point: &Point) -> AocResult<u64> {
 fn part1(grid: &Grid) -> AocResult<u64> {
     let mut accum: u64 = 0;
     for p in find_low_points(grid)? {
-        accum += p.1 as u64 + 1
+        accum += p.1 + 1
     }
     Ok(accum)
 }

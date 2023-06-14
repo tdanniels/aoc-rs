@@ -199,6 +199,12 @@ impl NodeWrapper {
     }
 }
 
+impl Default for NodeWrapper {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 pub struct DepthFirstIterator {
     stack: Vec<(NodeLink, usize)>,
 }

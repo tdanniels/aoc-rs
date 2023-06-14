@@ -307,7 +307,7 @@ fn solve(program: &Program, find_min: bool) -> AocResult<i64> {
                     cpu.write_register(Z, *zout);
                     cpu.exec(&subprogram, &[j as i8]).unwrap();
                     let z = cpu.read_register(Z);
-                    let new_input = 10 * (*input as i64) + j as i64;
+                    let new_input = 10 * *input + j as i64;
                     if i < 13 {
                         zta.entry(z)
                             .and_modify(|e| {
@@ -358,7 +358,7 @@ fn solve(program: &Program, find_min: bool) -> AocResult<i64> {
 }
 
 fn main() -> AocResult<()> {
-    let file = File::open(&get_cli_arg()?)?;
+    let file = File::open(get_cli_arg()?)?;
     let lines: Vec<String> = io::BufReader::new(file).lines().collect::<Result<_, _>>()?;
     let program = parse_input(&lines)?;
     println!("Part 1: {}", solve(&program, false)?);

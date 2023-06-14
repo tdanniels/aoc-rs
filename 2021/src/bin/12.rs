@@ -35,16 +35,14 @@ fn count_paths_to_end(
 
     let mut new_twice_node = twice_node;
     for neighbour in graph.neighbour_names(node)? {
-        match visited_small_caves.get(neighbour) {
-            Some(_) => {
-                if allow_twice && twice_node.is_none() && neighbour != "start" {
-                    new_twice_node = Some(neighbour);
-                } else {
-                    continue;
-                }
+        if visited_small_caves.get(neighbour).is_some() {
+            if allow_twice && twice_node.is_none() && neighbour != "start" {
+                new_twice_node = Some(neighbour);
+            } else {
+                continue;
             }
-            None => {}
         }
+
         count += count_paths_to_end(
             graph,
             neighbour,

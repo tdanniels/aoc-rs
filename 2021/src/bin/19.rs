@@ -393,7 +393,7 @@ fn solve(mut problem: Problem) -> AocResult<(usize, i64)> {
 }
 
 fn main() -> AocResult<()> {
-    let file = File::open(&get_cli_arg()?)?;
+    let file = File::open(get_cli_arg()?)?;
     let lines: Vec<String> = io::BufReader::new(file).lines().collect::<Result<_, _>>()?;
     println!("Part 1: {}", solve(parse_input(&lines)?)?.0);
     println!("Part 2: {}", solve(parse_input(&lines)?)?.1);

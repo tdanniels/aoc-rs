@@ -64,7 +64,7 @@ fn solve(image: &Grid, filter: &Grid, n_iter: usize) -> AocResult<usize> {
 }
 
 fn main() -> AocResult<()> {
-    let file = File::open(&get_cli_arg()?)?;
+    let file = File::open(get_cli_arg()?)?;
     let lines: Vec<String> = io::BufReader::new(file).lines().collect::<Result<_, _>>()?;
     let (image, filter) = parse_input(&lines)?;
     println!("Part 1: {}", solve(&filter, &image, 2)?);

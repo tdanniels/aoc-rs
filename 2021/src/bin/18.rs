@@ -174,7 +174,7 @@ fn part_2(problem: Vec<NodeWrapper>) -> AocResult<i64> {
 }
 
 fn main() -> AocResult<()> {
-    let file = File::open(&get_cli_arg()?)?;
+    let file = File::open(get_cli_arg()?)?;
     let lines: Vec<String> = io::BufReader::new(file).lines().collect::<Result<_, _>>()?;
     println!("Part 1: {}", part_1(parse_input(&lines)?.remove(0))?);
     println!("Part 2: {}", part_2(parse_input(&lines)?.remove(0))?);

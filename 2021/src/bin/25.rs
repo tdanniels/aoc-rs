@@ -64,7 +64,7 @@ fn part_1(grid: &Grid) -> AocResult<usize> {
 }
 
 fn main() -> AocResult<()> {
-    let file = File::open(&get_cli_arg()?)?;
+    let file = File::open(get_cli_arg()?)?;
     let lines: Vec<String> = io::BufReader::new(file).lines().collect::<Result<_, _>>()?;
     let grid = parse_input(&lines)?;
     println!("Part 1: {}", part_1(&grid)?);

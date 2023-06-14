@@ -218,7 +218,7 @@ fn prep_line(line: &str) -> AocResult<(Vec<String>, Vec<String>)> {
 }
 
 fn main() -> AocResult<()> {
-    let file = File::open(&get_cli_arg()?)?;
+    let file = File::open(get_cli_arg()?)?;
     let lines: Vec<String> = io::BufReader::new(file)
         .lines()
         .collect::<io::Result<_>>()?;

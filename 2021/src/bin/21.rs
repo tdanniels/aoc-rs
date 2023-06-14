@@ -150,12 +150,12 @@ fn part_2(p1_start: u64, p2_start: u64) -> AocResult<u64> {
     let p1_wins: u64 = state2in_degree
         .iter()
         .filter(|(k, _)| k.p1_score >= 21)
-        .map(|(_, v)| *v as u64)
+        .map(|(_, v)| *v)
         .sum();
     let p2_wins: u64 = state2in_degree
         .iter()
         .filter(|(k, _)| k.p1_score < 21 && (k.p2_score >= 21))
-        .map(|(_, v)| *v as u64)
+        .map(|(_, v)| *v)
         .sum();
     Ok(cmp::max(p1_wins, p2_wins))
 }
@@ -178,7 +178,7 @@ fn parse_input(lines: &Vec<String>) -> AocResult<(u64, u64)> {
 }
 
 fn main() -> AocResult<()> {
-    let file = File::open(&get_cli_arg()?)?;
+    let file = File::open(get_cli_arg()?)?;
     let lines: Vec<String> = io::BufReader::new(file).lines().collect::<Result<_, _>>()?;
     let (p1_start, p2_start) = parse_input(&lines)?;
     println!("Part 1: {}", part_1(p1_start, p2_start)?);

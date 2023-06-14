@@ -61,7 +61,7 @@ impl Grid {
             .flat_map(|s| {
                 s.chars().map(|c| {
                     u8::try_from(c.to_digit(10).ok_or("Bad char").map_err(AocError::new)?)
-                        .map_err(|e| AocError::new(&e.to_string()))
+                        .map_err(|e| AocError::new(e.to_string()))
                 })
             })
             .collect::<Result<Vec<_>, _>>()?;

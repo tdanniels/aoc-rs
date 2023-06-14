@@ -39,7 +39,7 @@ impl UnweightedUndirectedGraph {
             if edge_strings.len() != 2
                 || !edge_strings
                     .iter()
-                    .all(|v| v != "" && v.chars().all(|c| c.is_ascii_alphabetic()))
+                    .all(|v| !v.is_empty() && v.chars().all(|c| c.is_ascii_alphabetic()))
             {
                 return failure(format!("Malformed edge {:?} in input", edge_strings));
             }

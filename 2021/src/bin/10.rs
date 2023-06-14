@@ -108,7 +108,7 @@ fn part_2(lines: &Vec<String>) -> AocResult<u64> {
 }
 
 fn main() -> AocResult<()> {
-    let file = File::open(&get_cli_arg()?)?;
+    let file = File::open(get_cli_arg()?)?;
     let lines: Vec<String> = io::BufReader::new(file)
         .lines()
         .collect::<io::Result<_>>()?;
