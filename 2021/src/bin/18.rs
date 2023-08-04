@@ -1,6 +1,6 @@
 use aoc_util::{
-    errors::{failure, AocResult},
     binarytree::{Node, NodeWrapper},
+    errors::{failure, AocResult},
     io::get_cli_arg,
 };
 use std::cmp;
@@ -91,7 +91,7 @@ fn try_split(node: &NodeWrapper) -> bool {
     }) {
         let data = large_node.get_data().unwrap();
         let new_left = Node::new(Some(data / 2));
-        let new_right = Node::new(Some(data / 2 + if data % 2 != 0 { 1 } else { 0 }));
+        let new_right = Node::new(Some(data / 2 + data % 2));
         large_node.set_left(Some(&new_left.into()));
         large_node.set_right(Some(&new_right.into()));
         large_node.set_data(None);
