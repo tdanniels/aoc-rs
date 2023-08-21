@@ -137,7 +137,7 @@ impl Cpu {
     }
 
     pub fn reset(&mut self) {
-        for mut r in &mut self.registers {
+        for r in &mut self.registers {
             r.0 = 0;
         }
     }

@@ -109,8 +109,7 @@ fn part_2(p1_start: u64, p2_start: u64) -> AocResult<u64> {
     );
     states_to_visit.push(start);
 
-    while !states_to_visit.is_empty() {
-        let current_state = states_to_visit.pop().unwrap();
+    while let Some(current_state) = states_to_visit.pop() {
         if state2in_degree.contains_key(&current_state) {
             continue;
         }
@@ -168,8 +167,7 @@ fn parse_input(lines: &Vec<String>) -> AocResult<(u64, u64)> {
     for (i, l) in lines.iter().enumerate() {
         start[i] = l
             .chars()
-            .rev()
-            .next()
+            .next_back()
             .ok_or("No chars?")?
             .to_digit(10)
             .ok_or("Can't parse digit?")? as u64;
